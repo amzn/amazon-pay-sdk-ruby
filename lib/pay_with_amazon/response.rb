@@ -5,7 +5,6 @@ module PayWithAmazon
   # This class provides helpers to parse the response
   class Response
 
-     # @param response [String]
      def initialize(response)
        @response = response
      end

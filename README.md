@@ -12,7 +12,7 @@ or add the following in your Gemfile:
 gem 'pay_with_amazon'
 ```
 ```
-Bundle Install
+bundle install
 ```
 
 ## Requirements

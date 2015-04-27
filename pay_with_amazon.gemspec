@@ -15,10 +15,11 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.name = 'pay_with_amazon'
   s.version = PayWithAmazon::VERSION
-  s.summary = 'Login and Pay with Amazon Ruby SDK'
-  s.description = 'Login and Pay with Amazon Ruby SDK'
+  s.summary = 'Amazon Payments - Login and Pay with Amazon Ruby SDK'
+  s.description = 'Amazon Payments - Login and Pay with Amazon Ruby SDK'
   s.required_ruby_version = '>= 2.0.0'
   s.author = 'Amazon Payments'
+  s.email = 'pay-with-amazon-sdk@amazon.com'
   s.homepage = 'https://github.com/amzn/login-and-pay-with-amazon-sdk-ruby'
   s.files = Dir.glob('lib/**/*') + %w(LICENSE NOTICE README.md)
   s.require_path = ['lib']

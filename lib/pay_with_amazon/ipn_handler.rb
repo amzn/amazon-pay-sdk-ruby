@@ -31,10 +31,7 @@ module PayWithAmazon
     attr_reader(:headers, :body)
     attr_accessor(:proxy_addr, :proxy_port, :proxy_user, :proxy_pass)
 
-    # To initialize this class you will be required to
-    # pass in the request header and body. The body can be
-    # passed in parsed by json or without.
-    # @param header [request.headers]
+    # @param headers [request.headers]
     # @param body [request.body.read]
     # @optional proxy_addr [String]
     # @optional proxy_port [String]
@@ -58,7 +55,7 @@ module PayWithAmazon
     end
 
     # This method will authenticate the ipn message sent from Amazon.
-    # It will return true if everything is verified. It will display an
+    # It will return true if everything is verified. It will raise an
     # error message if verification fails.
     def authentic?
       begin

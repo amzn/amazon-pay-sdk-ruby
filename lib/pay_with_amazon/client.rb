@@ -1,8 +1,3 @@
-require 'uri'
-require 'net/http'
-require 'net/https'
-require 'base64'
-require 'openssl'
 require 'time'
 
 module PayWithAmazon
@@ -13,8 +8,6 @@ module PayWithAmazon
   # to integrate with Login and Pay with Amazon. This client only
   # uses the standard Ruby library and is not dependant on Rails.
   class Client
-
-    MAX_RETRIES = 4
 
     attr_reader(
       :merchant_id,
@@ -36,7 +29,7 @@ module PayWithAmazon
       :proxy_pass)
 
     # API keys are located at:
-    # @see htps://sellercentral.amazon.com
+    # @see https://sellercentral.amazon.com
     # @param merchant_id [String]
     # @param access_key [String]
     # @param secret_key [String]
@@ -44,7 +37,7 @@ module PayWithAmazon
     # @optional currency_code [Symbol] Default: :usd
     # @optional region [Symbol] Default: :na
     # @optional platform_id [String] Default: nil
-    # @optional throttle [Boolean]
+    # @optional throttle [Boolean] Default: true
     # @optional application_name [String]
     # @optional application_version [String]
     # @optional proxy_addr [String]
@@ -496,6 +489,7 @@ module PayWithAmazon
     # @optional transaction_timeout [Integer]
     # @optional capture_now [Boolean]
     # @optional soft_descriptor [String]
+    # @optional provider_credit_details [Array of Hash]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def authorize(
@@ -507,6 +501,7 @@ module PayWithAmazon
             transaction_timeout: nil,
             capture_now: nil,
             soft_descriptor: nil,
+            provider_credit_details: nil,
             merchant_id: @merchant_id,
             mws_auth_token: nil)
 
@@ -526,6 +521,8 @@ module PayWithAmazon
         'SoftDescriptor' => soft_descriptor,
         'MWSAuthToken' => mws_auth_token
       }
+
+      optional.merge!(set_provider_credit_details(provider_credit_details)) if provider_credit_details
 
       operation(parameters, optional)
     end
@@ -562,6 +559,7 @@ module PayWithAmazon
     # @optional currency_code [String]
     # @optional seller_capture_note [String]
     # @optional soft_descriptor [String]
+    # @optional provider_credit_details [Array of Hash]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def capture(
@@ -571,6 +569,7 @@ module PayWithAmazon
             currency_code: @currency_code,
             seller_capture_note: nil,
             soft_descriptor: nil,
+            provider_credit_details: nil,
             merchant_id: @merchant_id,
             mws_auth_token: nil)
 
@@ -588,6 +587,8 @@ module PayWithAmazon
         'SoftDescriptor' => soft_descriptor,
         'MWSAuthToken' => mws_auth_token
       }
+
+      optional.merge!(set_provider_credit_details(provider_credit_details)) if provider_credit_details
 
       operation(parameters, optional)
     end
@@ -624,6 +625,7 @@ module PayWithAmazon
     # @optional currency_code [String]
     # @optional seller_refund_note [String]
     # @optional soft_descriptor [String]
+    # @optional provider_credit_reversal_details [Array of Hash]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def refund(
@@ -633,6 +635,7 @@ module PayWithAmazon
             currency_code: @currency_code,
             seller_refund_note: nil,
             soft_descriptor: nil,
+            provider_credit_reversal_details: nil,
             merchant_id: @merchant_id,
             mws_auth_token: nil)
 
@@ -650,6 +653,8 @@ module PayWithAmazon
         'SoftDescriptor' => soft_descriptor,
         'MWSAuthToken' => mws_auth_token
       }
+
+      optional.merge!(set_provider_credit_reversal_details(provider_credit_reversal_details)) if provider_credit_reversal_details
 
       operation(parameters, optional)
     end
@@ -731,6 +736,81 @@ module PayWithAmazon
       operation(parameters, optional)
     end
 
+    # @param amazon_provider_credit_id [String]
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def get_provider_credit_details(
+            amazon_provider_credit_id,
+            merchant_id: @merchant_id,
+            mws_auth_token: nil)
+
+        parameters = {
+          'Action' => 'GetProviderCreditDetails',
+          'SellerId' => merchant_id,
+          'AmazonProviderCreditId' => amazon_provider_credit_id
+        }
+
+        optional = {
+          'MWSAuthToken' => mws_auth_token
+        }
+
+        operation(parameters, optional)
+    end
+
+    # @param amazon_provider_credit_reversal_id [String]
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def get_provider_credit_reversal_details(
+            amazon_provider_credit_reversal_id,
+            merchant_id: @merchant_id,
+            mws_auth_token: nil)
+
+        parameters = {
+          'Action' => 'GetProviderCreditReversalDetails',
+          'SellerId' => merchant_id,
+          'AmazonProviderCreditReversalId' => amazon_provider_credit_reversal_id
+        }
+
+        optional = {
+          'MWSAuthToken' => mws_auth_token
+        }
+
+        operation(parameters, optional)
+    end
+
+    # @param amazon_provider_credit_id [String]
+    # @param credit_reversal_reference_id [String]
+    # @param amount [String]
+    # @optional currency_code [String]
+    # @optional credit_reversal_note [String]
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def reverse_provider_credit(
+            amazon_provider_credit_id,
+            credit_reversal_reference_id,
+            amount,
+            currency_code: @currency_code,
+            credit_reversal_note: nil,
+            merchant_id: @merchant_id,
+            mws_auth_token: nil)
+
+      parameters = {
+        'Action' => 'ReverseProviderCredit',
+        'SellerId' => merchant_id,
+        'AmazonProviderCreditId' => amazon_provider_credit_id,
+        'CreditReversalReferenceId' => credit_reversal_reference_id,
+        'CreditReversalAmount.Amount' => amount,
+        'CreditReversalAmount.CurrencyCode' => currency_code
+      }
+
+      optional = {
+        'CreditReversalNote' => credit_reversal_note,
+        'MWSAuthToken' => mws_auth_token
+      }
+
+      operation(parameters, optional)
+    end
+
     private
 
     def region_hash
@@ -744,61 +824,51 @@ module PayWithAmazon
       }
     end
 
-    # This method combines the required and optional
-    # parameters to generate the post url, sign the post body,
-    # and send the post request.
+    # This method builds the provider credit details hash
+    # that will be combined with either the authorize or capture
+    # API call.
+    def set_provider_credit_details(provider_credit_details)
+      member_details = {}
+      provider_credit_details.each_with_index { |val, index|
+        member = index + 1
+        member_details["ProviderCreditList.member.#{member}.ProviderId"] = val[:provider_id]
+        member_details["ProviderCreditList.member.#{member}.CreditAmount.Amount"] = val[:amount]
+        member_details["ProviderCreditList.member.#{member}.CreditAmount.CurrencyCode"] = val[:currency_code]
+      }
+
+      return member_details
+    end
+
+    # This method builds the provider credit reversal
+    # details hash that will be combined with the refund
+    # API call.
+    def set_provider_credit_reversal_details(provider_credit_reversal_details)
+      member_details = {}
+      provider_credit_reversal_details.each_with_index { |val, index|
+        member = index + 1
+        member_details["ProviderCreditReversalList.member.#{member}.ProviderId"] = val[:provider_id]
+        member_details["ProviderCreditReversalList.member.#{member}.CreditReversalAmount.Amount"] = val[:amount]
+        member_details["ProviderCreditReversalList.member.#{member}.CreditReversalAmount.CurrencyCode"] = val[:currency_code]
+      }
+
+      return member_details
+    end
+
     def operation(parameters, optional)
-      optional.map { |k, v| parameters[k] = v unless v.nil? }
-      parameters = @default_hash.merge(parameters)
-      post_url = parameters.sort.map { |k, v| "#{k}=#{ custom_escape(v) }" }.join("&")
-      post_body = ["POST", "#{@mws_endpoint}", "/#{@sandbox_str}/#{PayWithAmazon::API_VERSION}", post_url].join("\n")
-      post_url += "&Signature=" + sign(post_body)
-      send_request(@mws_endpoint, @sandbox_str, post_url)
-    end
-
-    # This method signs the post body request that is being sent
-    # using the secret key provided.
-    def sign(post_body)
-      custom_escape(Base64.strict_encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, @secret_key, post_body)))
-    end
-
-    # This method performs the post to the MWS end point.
-    # It will retry three times after the initial post if
-    # the status code comes back as either 500 or 503.
-    def send_request(mws_endpoint, sandbox_str, post_url)
-      uri = URI("https://#{mws_endpoint}/#{sandbox_str}/#{PayWithAmazon::API_VERSION}")
-      https = Net::HTTP.new(uri.host, uri.port, @proxy_addr, @proxy_port, @proxy_user, @proxy_pass)
-      https.use_ssl = true
-      https.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      user_agent = {"User-Agent" => "Language=Ruby; ApplicationLibraryVersion=#{PayWithAmazon::VERSION}; Platform=#{RUBY_PLATFORM}; MWSClientVersion=#{PayWithAmazon::API_VERSION}; ApplicationName=#{@application_name}; ApplicationVersion=#{@application_version}"}
-      tries = 0
-      begin
-        response = https.post(uri.path, post_url, user_agent)
-        if @throttle.eql?(true)
-          if response.code.eql?('500')
-            raise 'InternalServerError'
-          elsif response.code.eql?('503')
-            raise 'ServiceUnavailable or RequestThrottled'
-          end
-        end
-        PayWithAmazon::Response.new(response)
-      rescue => error
-        tries += 1
-        sleep(get_seconds_for_try_count(tries))
-        retry if tries < MAX_RETRIES
-        raise error.message
-      end
-    end
-
-    def get_seconds_for_try_count(try_count)
-      seconds = { 1=>1, 2=>4, 3=>10, 4=>0 }
-      seconds[try_count]
-    end
-
-    def custom_escape(val)
-      val.to_s.gsub(/([^\w.~-]+)/) do
-        "%" + $1.unpack("H2" * $1.bytesize).join("%").upcase
-      end
+      PayWithAmazon::Request.new(
+          parameters,
+          optional,
+          @default_hash,
+          @mws_endpoint,
+          @sandbox_str,
+          @secret_key,
+          @proxy_addr,
+          @proxy_port,
+          @proxy_user,
+          @proxy_pass,
+          @throttle,
+          @application_name,
+          @application_version).send_post
     end
 
   end
