@@ -88,8 +88,7 @@ module PayWithAmazon
       @default_hash['PlatformId'] = @platform_id if @platform_id
     end
 
-    # Returns the operational status of the Off-Amazon Payments API section
-    # The GetServiceStatus operation returns the operational status of the Off-Amazon Payments API
+    # The GetServiceStatus operation returns the operational status of the Amazon Payments API
     # section of Amazon Marketplace Web Service (Amazon MWS). Status values are GREEN, GREEN_I, YELLOW, and RED.
     # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetServiceStatus.html
     def get_service_status
