@@ -6,12 +6,12 @@ require 'openssl'
 
 module PayWithAmazon
 
-  # Pay with Amazon API
+  # Login with Amazon API
   #
   # This class allows you to obtain user profile
   # information once a user has logged into your
   # application using their Amazon credentials.
-  class GetUser
+  class Login
 
     attr_reader(:region)
 
@@ -31,8 +31,9 @@ module PayWithAmazon
     # This method will validate the access token and
     # return the user's profile information.
     # @param access_token [String]
-    def get_user_info(access_token)
-      encoded_access_token = URI.encode(access_token)
+    def get_login_profile(access_token)
+      decoded_access_token = URI.decode(access_token)
+      encoded_access_token = URI.encode(decoded_access_token)
       uri = URI("https://#{@sandbox_str}.#{@endpoint}/auth/o2/tokeninfo?access_token=#{encoded_access_token}")
       req = Net::HTTP::Get.new(uri.request_uri)
       http = Net::HTTP.new(uri.host, uri.port)
@@ -47,13 +48,13 @@ module PayWithAmazon
 
       uri = URI.parse("https://#{@sandbox_str}.#{@endpoint}/user/profile")
       req = Net::HTTP::Get.new(uri.request_uri)
-      req['Authorization'] = "bearer " + access_token
+      req['Authorization'] = "bearer " + decoded_access_token
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
       response = http.request(req)
-      decoded_user_profile = JSON.parse(response.body)
-      return decoded_user_profile
+      decoded_login_profile = JSON.parse(response.body)
+      return decoded_login_profile
     end
 
     private

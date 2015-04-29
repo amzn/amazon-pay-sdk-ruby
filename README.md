@@ -390,7 +390,7 @@ client.close_billing_agreement(
 
 ```
 
-### Get User Info API
+### Get Login Profile API
 
 This API call allows you to obtain user profile information
 once a user has logged into your application using
@@ -403,7 +403,7 @@ require 'pay_with_amazon'
 # Central account.
 client_id = 'Your Client Id'
 
-user = PayWithAmazon::GetUser.new(
+login = PayWithAmazon::Login.new(
   client_id,
   region: :na, # Default: :na
   sandbox: true # Default: false
@@ -413,11 +413,11 @@ user = PayWithAmazon::GetUser.new(
 # parameters after a user has logged in.
 access_token = 'User Access Token'
 
-# Make the 'get_user_info' api call.
-user_info = user.get_user_info(access_token)
+# Make the 'get_login_profile' api call.
+profile = login.get_login_profile(access_token)
 
-name = user_info['name']
-email = user_info['email']
-user_id = user_info['user_id']
+name = profile['name']
+email = profile['email']
+user_id = profile['user_id']
 
 ```

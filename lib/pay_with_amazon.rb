@@ -1,7 +1,7 @@
 require 'pay_with_amazon/client'
 require 'pay_with_amazon/client_helper'
-require 'pay_with_amazon/get_user'
 require 'pay_with_amazon/ipn_handler'
+require 'pay_with_amazon/login'
 require 'pay_with_amazon/request'
 require 'pay_with_amazon/response'
 require 'pay_with_amazon/version'
