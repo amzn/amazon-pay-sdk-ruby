@@ -68,7 +68,7 @@ module PayWithAmazon
       custom_escape(Base64.strict_encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, @secret_key, post_body)))
     end
 
-    # This method performs the post to the MWS end point.
+    # This method performs the post to the MWS endpoint.
     # It will retry three times after the initial post if
     # the status code comes back as either 500 or 503.
     def post(mws_endpoint, sandbox_str, post_url)
