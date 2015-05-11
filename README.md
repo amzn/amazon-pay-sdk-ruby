@@ -149,7 +149,7 @@ response.success
 ### Instant Payment Notification Verification and Parsing
 
 ```ruby
-# This can be placed in your controller for a method
+# This can be placed in your rails controller for a method
 # that is configured to receive a "POST" IPN from Amazon.
 headers = request.headers
 body = request.body.read
@@ -211,6 +211,7 @@ client.get_order_reference_details(
   address_consent_token: address_consent_token
 )
 
+# Set the amount for the transaction.
 amount = '10.00'
 
 # Make the SetOrderReferenceDetails API call to
