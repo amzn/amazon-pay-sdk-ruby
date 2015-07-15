@@ -17,7 +17,7 @@ bundle install
 
 ## Requirements
 
-* Ruby 2.0.0 or higher
+* Ruby 1.9.3 or higher or Jruby 1.7.X
 
 ## Quick Start
 
