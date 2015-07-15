@@ -40,18 +40,14 @@ module PayWithAmazon
     def initialize(
             headers,
             body,
-            proxy_addr: :ENV,
-            proxy_port: nil,
-            proxy_user: nil,
-            proxy_pass: nil)
-
+            option = {})
       @body = body
       @raw = parse_from(@body)
       @headers = headers
-      @proxy_addr = proxy_addr
-      @proxy_port = proxy_port
-      @proxy_user = proxy_user
-      @proxy_pass = proxy_pass
+      @proxy_addr = options.fetch(:proxy_addr){ :ENV }
+      @proxy_port = options.fetch(:proxy_port){ nil }
+      @proxy_user = options.fetch(:proxy_user){ nil }
+      @proxy_pass = options.fetch(:proxy_pass){ nil }
     end
 
     # This method will authenticate the ipn message sent from Amazon.

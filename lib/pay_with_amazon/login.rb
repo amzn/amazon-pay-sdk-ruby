@@ -20,11 +20,11 @@ module PayWithAmazon
     # @param client_id [String]
     # @optional region [Symbol] Default: :na
     # @optional sandbox [Boolean] Default: false
-    def initialize(client_id, region: :na, sandbox: false)
+    def initialize(client_id, options = {})
       @client_id = client_id
-      @region = region
+      @region = options.fetch(:region){ :na }
       @endpoint = region_hash[@region]
-      @sandbox = sandbox
+      @sandbox = options.fetch(:sandbox){ false }
       @sandbox_str = @sandbox ? "api.sandbox" : "api"
     end
 
