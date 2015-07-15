@@ -538,7 +538,7 @@ module PayWithAmazon
 
       parameters = {
         'Action' => 'GetCaptureDetails',
-        'SellerId' => options(:merchant_id){ @merchant_id },
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonCaptureId' => amazon_capture_id
       }
 
@@ -710,7 +710,7 @@ module PayWithAmazon
 
       parameters = {
         'Action' => 'ReverseProviderCredit',
-        'SellerId' => options.fetch(:merchant_id){ @merchat_id},
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonProviderCreditId' => amazon_provider_credit_id,
         'CreditReversalReferenceId' => credit_reversal_reference_id,
         'CreditReversalAmount.Amount' => amount,
