@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.version = PayWithAmazon::VERSION
   s.summary = 'Amazon Payments - Login and Pay with Amazon Ruby SDK'
   s.description = 'Amazon Payments - Login and Pay with Amazon Ruby SDK'
-  #s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 1.9.3'
   s.author = 'Amazon Payments'
   s.email = 'pay-with-amazon-sdk@amazon.com'
   s.homepage = 'https://github.com/amzn/login-and-pay-with-amazon-sdk-ruby'
