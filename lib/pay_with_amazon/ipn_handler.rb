@@ -40,7 +40,7 @@ module PayWithAmazon
     def initialize(
             headers,
             body,
-            option = {})
+            options = {})
       @body = body
       @raw = parse_from(@body)
       @headers = headers

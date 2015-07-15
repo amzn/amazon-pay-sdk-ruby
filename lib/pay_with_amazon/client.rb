@@ -55,7 +55,7 @@ module PayWithAmazon
       @currency_code = options.fetch(:currency_code){:usd}.to_s.upcase
       @sandbox = options.fetch(:sandbox) { false }
       @sandbox_str = @sandbox ? 'OffAmazonPayments_Sandbox' : 'OffAmazonPayments'
-      @region = options.fetct(:region){:na}
+      @region = options.fetch(:region){:na}
       @mws_endpoint = region_hash[@region] ? region_hash[@region] : raise("Invalid Region Code. (#{@region})")
       @platform_id = options.fetch(:platform_id){ nil }
       @throttle = options.fetch(:throttle){ true}
