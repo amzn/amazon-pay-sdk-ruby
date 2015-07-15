@@ -299,7 +299,7 @@ module PayWithAmazon
             )
       parameters = {
         'Action' => 'CloseBillingAgreement',
-        'SellerId' => options.fetch(:merchant_id){ nil },
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonBillingAgreementId' => amazon_billing_agreement_id
       }
 
