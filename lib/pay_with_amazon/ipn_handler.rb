@@ -44,7 +44,7 @@ module PayWithAmazon
       @body = body
       @raw = parse_from(@body)
       @headers = headers
-      @proxy_addr = options.fetch(:proxy_addr){ :ENV }
+      @proxy_addr = options.fetch(:proxy_addr){ nil }
       @proxy_port = options.fetch(:proxy_port){ nil }
       @proxy_user = options.fetch(:proxy_user){ nil }
       @proxy_pass = options.fetch(:proxy_pass){ nil }

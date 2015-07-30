@@ -73,7 +73,7 @@ module PayWithAmazon
     # the status code comes back as either 500 or 503.
     def post(mws_endpoint, sandbox_str, post_url)
       uri = URI("https://#{mws_endpoint}/#{sandbox_str}/#{PayWithAmazon::API_VERSION}")
-      https = Net::HTTP.new(uri.host, uri.port)
+      https = Net::HTTP.new(uri.host, uri.port, @proxy_addr, @proxy_port, @proxy_user, @proxy_pass)
       https.use_ssl = true
       https.verify_mode = OpenSSL::SSL::VERIFY_PEER
       https.set_debug_output $stderr
