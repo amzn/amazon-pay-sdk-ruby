@@ -90,7 +90,7 @@ module PayWithAmazon
 
     # The GetServiceStatus operation returns the operational status of the Amazon Payments API
     # section of Amazon Marketplace Web Service (Amazon MWS). Status values are GREEN, GREEN_I, YELLOW, and RED.
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetServiceStatus.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752110
     def get_service_status
       parameters = {
         'Action' => 'GetServiceStatus'
@@ -100,7 +100,7 @@ module PayWithAmazon
     end
 
     # Creates an order reference for the given object
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_CreateOrderReferenceForId.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751670
     # @param id [String]
     # @param id_type [String]
     # @optional inherit_shipping_address [Boolean]
@@ -153,7 +153,7 @@ module PayWithAmazon
     end
 
     # Returns details about the Billing Agreement object and its current state
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetBillingAgreementDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751690
     # @param amazon_billing_agreement_id [String]
     # @optional address_consent_token [String]
     # @optional merchant_id [String]
@@ -180,7 +180,7 @@ module PayWithAmazon
 
     # Sets billing agreement details such as a description of the agreement
     # and other information about the seller.
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_SetBillingAgreementDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751700
     # @param amazon_billing_agreement_id [String]
     # @optional platform_id [String]
     # @optional seller_note [String]
@@ -219,7 +219,7 @@ module PayWithAmazon
 
     # Confirms that the billing agreement is free of constraints and all
     # required information has been set on the billing agreement
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_ConfirmBillingAgreement.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751710
     # @param amazon_billing_agreement_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
@@ -243,7 +243,7 @@ module PayWithAmazon
 
     # Validates the status of the BillingAgreement object and the payment
     # method associated with it
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_ValidateBillingAgreement.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751720
     # @param amazon_billing_agreement_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
@@ -267,7 +267,7 @@ module PayWithAmazon
 
     # Reserves a specified amount against the payment method(s) stored in the
     # billing agreement
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_AuthorizeOnBillingAgreement.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751940
     # @param amazon_billing_agreement_id [String]
     # @param authorization_reference_id [String]
     # @param amount [String]
@@ -331,7 +331,7 @@ module PayWithAmazon
     # Confirms that you want to terminate the billing agreement with the buyer
     # and that you do not expect to create any new order references or
     # authorizations on this billing agreement
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_CloseBillingAgreement.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751950
     # @param amazon_billing_agreement_id [String]
     # @optional closure_reason [String]
     # @optional merchant_id [String]
@@ -357,7 +357,7 @@ module PayWithAmazon
     end
 
     # Returns details about the Order Reference object and its current state
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetOrderReferenceDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751970
     # @param amazon_order_reference_id [String]
     # @optional address_consent_token [String]
     # @optional merchant_id [String]
@@ -384,7 +384,7 @@ module PayWithAmazon
 
     # Sets order reference details such as the order total and a description
     # for the order
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_SetOrderReferenceDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751960
     # @param amazon_order_reference_id [String]
     # @param amount [String]
     # @optional currency_code [String]
@@ -429,7 +429,7 @@ module PayWithAmazon
 
     # Confirms that the order reference is free of constraints and all required
     # information has been set on the order reference
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_ConfirmOrderReference.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751980
     # @param amazon_order_reference_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
@@ -452,7 +452,7 @@ module PayWithAmazon
     end
 
     # Cancels a previously confirmed order reference
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_CancelOrderReference.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201751990
     # @param amazon_order_reference_id [String]
     # @optional cancelation_reason [String]
     # @optional merchant_id [String]
@@ -479,7 +479,7 @@ module PayWithAmazon
 
     # Reserves a specified amount against the payment method(s) stored in the
     # order reference
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_Authorize.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752010
     # @param amazon_order_reference_id [String]
     # @param authorization_reference_id [String]
     # @param amount [String]
@@ -528,7 +528,7 @@ module PayWithAmazon
 
     # Returns the status of a particular authorization and the total amount
     # captured on the authorization
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetAuthorizationDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752030
     # @param amazon_authorization_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
@@ -551,7 +551,7 @@ module PayWithAmazon
     end
 
     # Captures funds from an authorized payment instrument.
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_Capture.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752040
     # @param amazon_authorization_id [String]
     # @param capture_reference_id [String]
     # @param amount [String]
@@ -594,7 +594,7 @@ module PayWithAmazon
 
     # Returns the status of a particular capture and the total amount refunded
     # on the capture
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetCaptureDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752060
     # @param amazon_capture_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
@@ -617,7 +617,7 @@ module PayWithAmazon
     end
 
     # Refunds a previously captured amount
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_Refund.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752080
     # @param amazon_capture_id [String]
     # @param refund_reference_id [String]
     # @param amount [String]
@@ -659,7 +659,7 @@ module PayWithAmazon
     end
 
     # Returns the status of a particular refund
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_GetRefundDetails.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752100
     # @param amazon_refund_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
@@ -682,7 +682,7 @@ module PayWithAmazon
     end
 
     # Closes an authorization
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_CloseAuthorization.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752070
     # @param amazon_authorization_id [String]
     # @optional closure_reason [String]
     # @optional merchant_id [String]
@@ -710,7 +710,7 @@ module PayWithAmazon
     # Confirms that an order reference has been fulfilled (fully or partially)
     # and that you do not expect to create any new authorizations on this
     # order reference
-    # @see http://docs.developer.amazonservices.com/en_US/off_amazon_payments/OffAmazonPayments_CloseOrderReference.html
+    # @see https://payments.amazon.com/documentation/apireference/201751630#201752000
     # @param amazon_order_reference_id [String]
     # @optional closure_reason [String]
     # @optional merchant_id [String]
