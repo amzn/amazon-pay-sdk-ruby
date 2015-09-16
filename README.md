@@ -2,6 +2,7 @@
 Login and Pay with Amazon API Integration
 
 # Install
+
 ```
 gem install pay_with_amazon
 ```
