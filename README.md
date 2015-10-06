@@ -19,6 +19,14 @@ bundle install
 
 * Ruby 2.0.0 or higher
 
+## Documentation
+
+* The Integration steps can be found [here](https://payments.amazon.com/documentation)
+
+## Sample
+
+* View the sample integration demo [here](https://amzn.github.io/login-and-pay-with-amazon-sdk-samples/)
+
 ## Quick Start
 
 Instantiating the client:
