@@ -58,7 +58,8 @@ module PayWithAmazon
             proxy_addr: :ENV,
             proxy_port: nil,
             proxy_user: nil,
-            proxy_pass: nil)
+            proxy_pass: nil,
+            mws_auth_token: nil)
 
       @merchant_id = merchant_id
       @access_key = access_key
@@ -76,6 +77,7 @@ module PayWithAmazon
       @proxy_port = proxy_port
       @proxy_user = proxy_user
       @proxy_pass = proxy_pass
+      @mws_auth_token = mws_auth_token
 
       @default_hash = {
         'AWSAccessKeyId' => @access_key,
@@ -86,6 +88,7 @@ module PayWithAmazon
       }
 
       @default_hash['PlatformId'] = @platform_id if @platform_id
+      @default_hash['MWSAuthToken'] = @mws_auth_token if @mws_auth_token
     end
 
     # The GetServiceStatus operation returns the operational status of the Amazon Payments API
