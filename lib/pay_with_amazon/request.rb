@@ -76,6 +76,7 @@ module PayWithAmazon
       https = Net::HTTP.new(uri.host, uri.port, @proxy_addr, @proxy_port, @proxy_user, @proxy_pass)
       https.use_ssl = true
       https.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      https.set_debug_output $stderr
       user_agent = {"User-Agent" => "Language=Ruby; ApplicationLibraryVersion=#{PayWithAmazon::VERSION}; Platform=#{RUBY_PLATFORM}; MWSClientVersion=#{PayWithAmazon::API_VERSION}; ApplicationName=#{@application_name}; ApplicationVersion=#{@application_version}"}
       tries = 0
       begin

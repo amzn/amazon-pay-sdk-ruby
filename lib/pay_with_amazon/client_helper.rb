@@ -22,15 +22,16 @@ module PayWithAmazon
             amazon_reference_id,
             authorization_reference_id,
             charge_amount,
-            charge_currency_code: @currency_code,
-            charge_note: nil,
-            charge_order_id: nil,
-            store_name: nil,
-            custom_information: nil,
-            soft_descriptor: nil,
-            platform_id: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
+      charge_currency_code =  options.fetch(:charge_currency_code){ @currency_code }
+      charge_note          =  options.fetch(charge_note){ nil }
+      charge_order_id      =  options.fetch(:charge_order_id){ nil }
+      store_name           =  options.fetch(:store_name){ nil }
+      custom_information   =  options.fetch(:custom_information){ nil }
+      soft_descriptor      =  options.fetch(:soft_descriptor){ nil }
+      platform_id          =  options.fetch(:platform_id){ nil }
+      merchant_id          =  options.fetch(:merchant_id){ @merchant_id }
+      mws_auth_token       =  options.fetch(:mws_auth_token){ nil }
 
       if is_order_reference?(amazon_reference_id)
         response = call_order_reference_api(

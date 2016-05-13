@@ -48,34 +48,23 @@ module PayWithAmazon
             merchant_id,
             access_key,
             secret_key,
-            sandbox: false,
-            currency_code: :usd,
-            region: :na,
-            platform_id: nil,
-            throttle: true,
-            application_name: nil,
-            application_version: nil,
-            proxy_addr: :ENV,
-            proxy_port: nil,
-            proxy_user: nil,
-            proxy_pass: nil)
-
+            options = {})
       @merchant_id = merchant_id
       @access_key = access_key
       @secret_key = secret_key
-      @currency_code = currency_code.to_s.upcase
-      @sandbox = sandbox
+      @currency_code = options.fetch(:currency_code){:usd}.to_s.upcase
+      @sandbox = options.fetch(:sandbox) { false }
       @sandbox_str = @sandbox ? 'OffAmazonPayments_Sandbox' : 'OffAmazonPayments'
-      @region = region
+      @region = options.fetch(:region){:na}
       @mws_endpoint = region_hash[@region] ? region_hash[@region] : raise("Invalid Region Code. (#{@region})")
-      @platform_id = platform_id
-      @throttle = throttle
-      @application_name = application_name
-      @application_version = application_version
-      @proxy_addr = proxy_addr
-      @proxy_port = proxy_port
-      @proxy_user = proxy_user
-      @proxy_pass = proxy_pass
+      @platform_id = options.fetch(:platform_id){ nil }
+      @throttle = options.fetch(:throttle){ true}
+      @application_name = options.fetch(:application_name){ nil }
+      @application_version = options.fetch(:application_version){ nil}
+      @proxy_addr = options.fetch(:proxy_addr){ nil }
+      @proxy_port = options.fetch(:proxy_port){ nil }
+      @proxy_user = options.fetch(:proxy_user){ nil }
+      @proxy_pass = options.fetch(:proxy_pass){ nil }
 
       @default_hash = {
         'AWSAccessKeyId' => @access_key,
@@ -117,36 +106,25 @@ module PayWithAmazon
     def create_order_reference_for_id(
             id,
             id_type,
-            inherit_shipping_address: nil,
-            confirm_now: nil,
-            amount: nil,
-            currency_code: @currency_code,
-            platform_id: nil,
-            seller_note: nil,
-            seller_order_id: nil,
-            store_name: nil,
-            custom_information: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+             options = {})
       parameters = {
         'Action' => 'CreateOrderReferenceForId',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'Id' => id,
         'IdType' => id_type
       }
 
       optional = {
-        'InheritShippingAddress' => inherit_shipping_address,
-        'ConfirmNow' => confirm_now,
-        'OrderReferenceAttributes.OrderTotal.Amount' => amount,
-        'OrderReferenceAttributes.OrderTotal.CurrencyCode' => currency_code,
-        'OrderReferenceAttributes.PlatformId' => platform_id,
-        'OrderReferenceAttributes.SellerNote' => seller_note,
-        'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => seller_order_id,
-        'OrderReferenceAttributes.SellerOrderAttributes.StoreName' => store_name,
-        'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
-        'MWSAuthToken' => mws_auth_token
+        'InheritShippingAddress' => options.fetch(:inherit_shipping_address){ nil },
+        'ConfirmNow' => options.fetch(:confirm_now){ nil},
+        'OrderReferenceAttributes.OrderTotal.Amount' => options.fetch(:amount){ nil },
+        'OrderReferenceAttributes.OrderTotal.CurrencyCode' => options.fetch(:currency_code){ @currency_code},
+        'OrderReferenceAttributes.PlatformId' => options.fetch(:platform_id){ nil },
+        'OrderReferenceAttributes.SellerNote' => options.fetch(:seller_note){ nil },
+        'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => options.fetch(:seller_order_id){ nil },
+        'OrderReferenceAttributes.SellerOrderAttributes.StoreName' =>  options.fetch(:store_name){ nil },
+        'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => options.fetch(:custom_information){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -160,19 +138,17 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_billing_agreement_details(
             amazon_billing_agreement_id,
-            address_consent_token: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'GetBillingAgreementDetails',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonBillingAgreementId' => amazon_billing_agreement_id
       }
 
       optional = {
-        'AddressConsentToken' => address_consent_token,
-        'MWSAuthToken' => mws_auth_token
+        'AddressConsentToken' => options.fetch(:address_consent_token){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -191,27 +167,20 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def set_billing_agreement_details(
             amazon_billing_agreement_id,
-            platform_id: nil,
-            seller_note: nil,
-            seller_billing_agreement_id: nil,
-            custom_information: nil,
-            store_name: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+            options = {})
       parameters = {
         'Action' => 'SetBillingAgreementDetails',
-        'SellerId' => merchant_id,
+        'SellerId' =>  options.fetch(:merchant_id){ @merchant_id},
         'AmazonBillingAgreementId' => amazon_billing_agreement_id
       }
 
       optional = {
-        'BillingAgreementAttributes.PlatformId' => platform_id,
-        'BillingAgreementAttributes.SellerNote' => seller_note,
-        'BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId' => seller_billing_agreement_id,
-        'BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation' => custom_information,
-        'BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName' => store_name,
-        'MWSAuthToken' => mws_auth_token
+        'BillingAgreementAttributes.PlatformId' =>  options.fetch(:platform_id){ nil },
+        'BillingAgreementAttributes.SellerNote' =>  options.fetch(:seller_note){ nil },
+        'BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId' =>  options.fetch(:seller_billing_agreement_id){ nil },
+        'BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation' =>  options.fetch(:custom_information){ nil },
+        'BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName' =>  options.fetch(:store_name){ nil },
+        'MWSAuthToken' =>  options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -225,17 +194,17 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def confirm_billing_agreement(
             amazon_billing_agreement_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {}
+          )
 
       parameters = {
         'Action' => 'ConfirmBillingAgreement',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id},
         'AmazonBillingAgreementId' => amazon_billing_agreement_id
       }
 
       optional = {
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -249,17 +218,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def validate_billing_agreement(
             amazon_billing_agreement_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'ValidateBillingAgreement',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonBillingAgreementId' => amazon_billing_agreement_id
       }
 
       optional = {
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -288,41 +256,30 @@ module PayWithAmazon
             amazon_billing_agreement_id,
             authorization_reference_id,
             amount,
-            currency_code: @currency_code,
-            seller_authorization_note: nil,
-            transaction_timeout: nil,
-            capture_now: false,
-            soft_descriptor: nil,
-            seller_note: nil,
-            platform_id: nil,
-            custom_information: nil,
-            seller_order_id: nil,
-            store_name: nil,
-            inherit_shipping_address: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {}
+            )
 
       parameters = {
         'Action' => 'AuthorizeOnBillingAgreement',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonBillingAgreementId' => amazon_billing_agreement_id,
         'AuthorizationReferenceId' => authorization_reference_id,
         'AuthorizationAmount.Amount' => amount,
-        'AuthorizationAmount.CurrencyCode' => currency_code
+        'AuthorizationAmount.CurrencyCode' => options.fetch(:currency_code){ @currency_code }
       }
 
       optional = {
-        'SellerAuthorizationNote' => seller_authorization_note,
-        'TransactionTimeout' => transaction_timeout,
-        'CaptureNow' => capture_now,
-        'SoftDescriptor' => soft_descriptor,
-        'SellerNote' => seller_note,
-        'PlatformId' => platform_id,
-        'SellerOrderAttributes.CustomInformation' => custom_information,
-        'SellerOrderAttributes.SellerOrderId' => seller_order_id,
-        'SellerOrderAttributes.StoreName' => store_name,
-        'InheritShippingAddress' => inherit_shipping_address,
-        'MWSAuthToken' => mws_auth_token
+        'SellerAuthorizationNote' => options.fetch(:seller_authorization_note){ nil },
+        'TransactionTimeout' => options.fetch(:transaction_timeout){ nil },
+        'CaptureNow' => options.fetch(:capture_now){ false },
+        'SoftDescriptor' => options.fetch(:soft_descriptor){ nil },
+        'SellerNote' => options.fetch(:seller_note){ nil },
+        'PlatformId' => options.fetch(:platform_id){ nil },
+        'SellerOrderAttributes.CustomInformation' =>  options.fetch(:custom_information){ nil },
+        'SellerOrderAttributes.SellerOrderId' =>  options.fetch(:seller_order_id){ nil },
+        'SellerOrderAttributes.StoreName' =>  options.fetch(:store_name){ nil },
+        'InheritShippingAddress' =>  options.fetch(:inherit_shipping_address){ nil },
+        'MWSAuthToken' =>  options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -338,19 +295,17 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def close_billing_agreement(
             amazon_billing_agreement_id,
-            closure_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+            options = {}
+            )
       parameters = {
         'Action' => 'CloseBillingAgreement',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonBillingAgreementId' => amazon_billing_agreement_id
       }
 
       optional = {
-        'ClosureReason' => closure_reason,
-        'MWSAuthToken' => mws_auth_token
+        'ClosureReason' => options.fetch(:closure_reason){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -364,19 +319,18 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_order_reference_details(
             amazon_order_reference_id,
-            address_consent_token: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {}
+            )
 
       parameters = {
         'Action' => 'GetOrderReferenceDetails',
-        'SellerId' => merchant_id,
+        'SellerId' =>options.fetch(:merchant_id){ @merchant_id },
         'AmazonOrderReferenceId' => amazon_order_reference_id
       }
 
       optional = {
-        'AddressConsentToken' => address_consent_token,
-        'MWSAuthToken' => mws_auth_token
+        'AddressConsentToken' => options.fetch(:address_consent_token){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -398,30 +352,24 @@ module PayWithAmazon
     def set_order_reference_details(
             amazon_order_reference_id,
             amount,
-            currency_code: @currency_code,
-            platform_id: nil,
-            seller_note: nil,
-            seller_order_id: nil,
-            store_name: nil,
-            custom_information: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {}
+            )
 
       parameters = {
         'Action' => 'SetOrderReferenceDetails',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id},
         'AmazonOrderReferenceId' => amazon_order_reference_id,
         'OrderReferenceAttributes.OrderTotal.Amount' => amount,
-        'OrderReferenceAttributes.OrderTotal.CurrencyCode' => currency_code
+        'OrderReferenceAttributes.OrderTotal.CurrencyCode' => options.fetch(:currency_code){ @currency_code }
       }
 
       optional = {
-        'OrderReferenceAttributes.PlatformId' => platform_id,
-        'OrderReferenceAttributes.SellerNote' => seller_note,
-        'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => seller_order_id,
-        'OrderReferenceAttributes.SellerOrderAttributes.StoreName' => store_name,
-        'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
-        'MWSAuthToken' => mws_auth_token
+        'OrderReferenceAttributes.PlatformId' => options.fetch(:platform_id){ nil },
+        'OrderReferenceAttributes.SellerNote' => options.fetch(:seller_note){ nil },
+        'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => options.fetch(:seller_order_id){ nil },
+        'OrderReferenceAttributes.SellerOrderAttributes.StoreName' => options.fetch(:store_name){ nil },
+        'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => options.fetch(:custom_information){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -435,17 +383,17 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def confirm_order_reference(
             amazon_order_reference_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {}
+            )
 
       parameters = {
         'Action' => 'ConfirmOrderReference',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonOrderReferenceId' => amazon_order_reference_id
       }
 
       optional = {
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -459,19 +407,17 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def cancel_order_reference(
             amazon_order_reference_id,
-            cancelation_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'CancelOrderReference',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id},
         'AmazonOrderReferenceId' => amazon_order_reference_id
       }
 
       optional = {
-        'CancelationReason' => cancelation_reason,
-        'MWSAuthToken' => mws_auth_token
+        'CancelationReason' => options.fetch(:cancelation_reason){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -495,32 +441,25 @@ module PayWithAmazon
             amazon_order_reference_id,
             authorization_reference_id,
             amount,
-            currency_code: @currency_code,
-            seller_authorization_note: nil,
-            transaction_timeout: nil,
-            capture_now: nil,
-            soft_descriptor: nil,
-            provider_credit_details: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+            options = {}
+            )
       parameters = {
         'Action' => 'Authorize',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonOrderReferenceId' => amazon_order_reference_id,
         'AuthorizationReferenceId' => authorization_reference_id,
         'AuthorizationAmount.Amount' => amount,
-        'AuthorizationAmount.CurrencyCode' => currency_code
+        'AuthorizationAmount.CurrencyCode' =>  options.fetch(:currency_code){ @currency_code }
       }
 
       optional = {
-        'SellerAuthorizationNote' => seller_authorization_note,
-        'TransactionTimeout' => transaction_timeout,
-        'CaptureNow' => capture_now,
-        'SoftDescriptor' => soft_descriptor,
-        'MWSAuthToken' => mws_auth_token
+        'SellerAuthorizationNote' =>  options.fetch(:seller_authorization_note){ nil },
+        'TransactionTimeout' =>  options.fetch(:transaction_timeout){ nil },
+        'CaptureNow' =>  options.fetch(:capture_now){ nil },
+        'SoftDescriptor' =>  options.fetch(:soft_descriptor){ nil },
+        'MWSAuthToken' =>  options.fetch(:mws_auth_token){ nil }
       }
-
+      provider_credit_details =  options.fetch(:provider_credit_details){ nil }
       optional.merge!(set_provider_credit_details(provider_credit_details)) if provider_credit_details
 
       operation(parameters, optional)
@@ -534,17 +473,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_authorization_details(
             amazon_authorization_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'GetAuthorizationDetails',
-        'SellerId' => merchant_id,
+        'SellerId' =>  options.fetch(:merchant_id){ @merchant_id },
         'AmazonAuthorizationId' => amazon_authorization_id
       }
 
       optional = {
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' =>  options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -565,28 +503,24 @@ module PayWithAmazon
             amazon_authorization_id,
             capture_reference_id,
             amount,
-            currency_code: @currency_code,
-            seller_capture_note: nil,
-            soft_descriptor: nil,
-            provider_credit_details: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'Capture',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonAuthorizationId' => amazon_authorization_id,
         'CaptureReferenceId' => capture_reference_id,
         'CaptureAmount.Amount' => amount,
-        'CaptureAmount.CurrencyCode' => currency_code
+        'CaptureAmount.CurrencyCode' =>  options.fetch(:currency_code){ @currency_code }
       }
 
       optional = {
-        'SellerCaptureNote' => seller_capture_note,
-        'SoftDescriptor' => soft_descriptor,
-        'MWSAuthToken' => mws_auth_token
+        'SellerCaptureNote' =>  options.fetch(:seller_capture_note){ nil },
+        'SoftDescriptor' =>  options.fetch(:soft_descriptor){ nil },
+        'MWSAuthToken' =>  options.fetch(:mws_auth_token){ nil }
       }
 
+      provider_credit_details =  options.fetch(:provider_credit_details){ nil }
       optional.merge!(set_provider_credit_details(provider_credit_details)) if provider_credit_details
 
       operation(parameters, optional)
@@ -600,17 +534,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_capture_details(
             amazon_capture_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'GetCaptureDetails',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonCaptureId' => amazon_capture_id
       }
 
       optional = {
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -631,28 +564,22 @@ module PayWithAmazon
             amazon_capture_id,
             refund_reference_id,
             amount,
-            currency_code: @currency_code,
-            seller_refund_note: nil,
-            soft_descriptor: nil,
-            provider_credit_reversal_details: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+            options = {})
       parameters = {
         'Action' => 'Refund',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonCaptureId' => amazon_capture_id,
         'RefundReferenceId' => refund_reference_id,
         'RefundAmount.Amount' => amount,
-        'RefundAmount.CurrencyCode' => currency_code
+        'RefundAmount.CurrencyCode' => options.fetch(:currency_code){ @currency_code }
       }
 
       optional = {
-        'SellerRefundNote' => seller_refund_note,
-        'SoftDescriptor' => soft_descriptor,
-        'MWSAuthToken' => mws_auth_token
+        'SellerRefundNote' => options.fetch(:seller_refund_note){ nil },
+        'SoftDescriptor' => options.fetch(:soft_descriptor){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
-
+      provider_credit_reversal_details  = options.fetch(:provider_credit_reversal_details){ nil }
       optional.merge!(set_provider_credit_reversal_details(provider_credit_reversal_details)) if provider_credit_reversal_details
 
       operation(parameters, optional)
@@ -665,17 +592,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_refund_details(
             amazon_refund_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'GetRefundDetails',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonRefundId' => amazon_refund_id
       }
 
       optional = {
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -689,19 +615,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def close_authorization(
             amazon_authorization_id,
-            closure_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+            options = {})
       parameters = {
         'Action' => 'CloseAuthorization',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonAuthorizationId' => amazon_authorization_id
       }
 
       optional = {
-        'ClosureReason' => closure_reason,
-        'MWSAuthToken' => mws_auth_token
+        'ClosureReason' => options.fetch(:closure_reason){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -717,19 +640,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def close_order_reference(
             amazon_order_reference_id,
-            closure_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
-
+            options = {})
       parameters = {
         'Action' => 'CloseOrderReference',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonOrderReferenceId' => amazon_order_reference_id
       }
 
       optional = {
-        'ClosureReason' => closure_reason,
-        'MWSAuthToken' => mws_auth_token
+        'ClosureReason' => options.fetch(:closure_reason){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
@@ -740,17 +660,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_provider_credit_details(
             amazon_provider_credit_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
         parameters = {
           'Action' => 'GetProviderCreditDetails',
-          'SellerId' => merchant_id,
+          'SellerId' => options.fetch(:merchant_id){ @merchant_id },
           'AmazonProviderCreditId' => amazon_provider_credit_id
         }
 
         optional = {
-          'MWSAuthToken' => mws_auth_token
+          'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
         }
 
         operation(parameters, optional)
@@ -761,17 +680,16 @@ module PayWithAmazon
     # @optional mws_auth_token [String]
     def get_provider_credit_reversal_details(
             amazon_provider_credit_reversal_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
         parameters = {
           'Action' => 'GetProviderCreditReversalDetails',
-          'SellerId' => merchant_id,
+          'SellerId' => options.fetch(:merchant_id){ @merchant_id },
           'AmazonProviderCreditReversalId' => amazon_provider_credit_reversal_id
         }
 
         optional = {
-          'MWSAuthToken' => mws_auth_token
+          'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
         }
 
         operation(parameters, optional)
@@ -788,23 +706,20 @@ module PayWithAmazon
             amazon_provider_credit_id,
             credit_reversal_reference_id,
             amount,
-            currency_code: @currency_code,
-            credit_reversal_note: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+            options = {})
 
       parameters = {
         'Action' => 'ReverseProviderCredit',
-        'SellerId' => merchant_id,
+        'SellerId' => options.fetch(:merchant_id){ @merchant_id },
         'AmazonProviderCreditId' => amazon_provider_credit_id,
         'CreditReversalReferenceId' => credit_reversal_reference_id,
         'CreditReversalAmount.Amount' => amount,
-        'CreditReversalAmount.CurrencyCode' => currency_code
+        'CreditReversalAmount.CurrencyCode' => options.fetch(:currency_code){ @currency_code }
       }
 
       optional = {
-        'CreditReversalNote' => credit_reversal_note,
-        'MWSAuthToken' => mws_auth_token
+        'CreditReversalNote' => options.fetch(:credit_reversal_note){ nil },
+        'MWSAuthToken' => options.fetch(:mws_auth_token){ nil }
       }
 
       operation(parameters, optional)
