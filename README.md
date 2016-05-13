@@ -1,5 +1,5 @@
 # Login and Pay with Amazon Ruby SDK
-Login and Pay with Amazon API Integration
+Login and Pay with Amazon API Integration.
 
 # Install
 
