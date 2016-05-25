@@ -1,0 +1,29 @@
+PATH
+  remote: .
+  specs:
+    pay_with_amazon (1.1.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.4.0)
+    crack (0.4.3)
+      safe_yaml (~> 1.0.0)
+    hashdiff (0.3.0)
+    minitest (5.9.0)
+    safe_yaml (1.0.4)
+    webmock (2.0.3)
+      addressable (>= 2.3.6)
+      crack (>= 0.3.2)
+      hashdiff
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  minitest
+  pay_with_amazon!
+  webmock
+
+BUNDLED WITH
+   1.11.2

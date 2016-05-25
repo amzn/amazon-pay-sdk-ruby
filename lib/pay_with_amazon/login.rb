@@ -25,7 +25,7 @@ module PayWithAmazon
       @region = region
       @endpoint = region_hash[@region]
       @sandbox = sandbox
-      @sandbox_str = @sandbox ? "api.sandbox" : "api"
+      @sandbox_str = @sandbox ? sandbox_hash[@region] : "api"
     end
 
     # This method will validate the access token and
@@ -70,6 +70,16 @@ module PayWithAmazon
       }
     end
 
-  end
+    def sandbox_hash
+      {
+        :jp => 'api-sandbox',
+        :uk => 'api.sandbox',
+        :de => 'api.sandbox',
+        :eu => 'api.sandbox',
+        :us => 'api.sandbox',
+        :na => 'api.sandbox'
+      }
+    end
 
+  end
 end
