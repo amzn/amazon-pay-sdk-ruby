@@ -1,0 +1,7 @@
+require 'amazon_pay/client'
+require 'amazon_pay/client_helper'
+require 'amazon_pay/ipn_handler'
+require 'amazon_pay/login'
+require 'amazon_pay/request'
+require 'amazon_pay/response'
+require 'amazon_pay/version'
