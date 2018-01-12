@@ -1,0 +1,48 @@
+# Logfile created on 2017-11-28 13:51:13 -0800 by logger.rb/56815
+{time: "2017-11-28 13:51:13 -0800
+", message: "AWSAccessKeyId=<AccessKey>&Action=GetOrderReferenceDetails&AmazonOrderReferenceId=S02-0156952-3817681&SellerId=<SellerId>&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-11-28T21%3A51%3A13Z&Version=2013-01-01&Signature=gMfMyaq56lzaH%2FRZq5O2JMHhWsdwbRgcYXCFqfbRGX8%3D from "}
+{time: "2017-11-28 13:51:14 -0800
+", message: "<GetOrderReferenceDetailsResponse xmlns="http://mws.amazonservices.com/schema/OffAmazonPayments/2013-01-01">
+  <GetOrderReferenceDetailsResult>
+    <OrderReferenceDetails>
+      <OrderReferenceStatus>
+        <LastUpdateTimestamp>2017-11-28T20:58:15.693Z</LastUpdateTimestamp>
+        <State>Open</State>
+      </OrderReferenceStatus>
+      <PaymentReference>
+        <StaticToken>3FH4IrYnG9HwT1LYYFFPJXkWSxnoNdc60JSzDpmgg20=</StaticToken>
+      </PaymentReference>
+      <Destination>
+        <DestinationType>Physical</DestinationType>
+        <PhysicalDestination>*REMOVED*</PhysicalDestination>
+      </Destination>
+      <ExpirationTimestamp>2018-05-27T20:51:24.396Z</ExpirationTimestamp>
+      <IdList/>
+      <SellerOrderAttributes>
+        <StoreName>Test Store Name</StoreName>
+        <CustomInformation>Example Customer Info</CustomInformation>
+        <OrderItemCategories>
+          <OrderItemCategory>Antiques</OrderItemCategory>
+        </OrderItemCategories>
+        <SellerOrderId>seller order id</SellerOrderId>
+      </SellerOrderAttributes>
+      <OrderTotal>
+        <CurrencyCode>GBP</CurrencyCode>
+        <Amount>100.00</Amount>
+      </OrderTotal>
+      <Buyer>
+        <Name>testMe</Name>
+        <Email>testMe@this.com</Email>
+      </Buyer>
+      <ReleaseEnvironment>Sandbox</ReleaseEnvironment>
+      <SellerNote>*REMOVED*</SellerNote>
+      <AmazonOrderReferenceId>S02-0156952-3817681</AmazonOrderReferenceId>
+      <CreationTimestamp>2017-11-28T20:51:24.396Z</CreationTimestamp>
+      <RequestPaymentAuthorization>false</RequestPaymentAuthorization>
+    </OrderReferenceDetails>
+  </GetOrderReferenceDetailsResult>
+  <ResponseMetadata>
+    <RequestId>8af28a36-d4e5-419d-95a5-9618647d95c1</RequestId>
+  </ResponseMetadata>
+</GetOrderReferenceDetailsResponse>
+ from "}

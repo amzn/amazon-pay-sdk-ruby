@@ -67,6 +67,48 @@ module AmazonPay
       end
     end
 
+    # Modify order attributes such as CustomInformation
+    # for the order
+    # This is a convenience function for set_order_attributes to prevent accidentally passing
+    # extra variables that can't be modified ater Amazon Order Reference (ORO) is confirmed.
+    # @see https://pay.amazon.com/documentation/apireference/201751630#201751960
+    # @param amazon_order_reference_id [String]
+    # @optional request_payment_authorization [Boolean]
+    # @optional seller_note [String]
+    # @optional seller_order_id [String]
+    # @optional store_name [String]
+    # @optional custom_information [String]
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def modify_order_attributes(
+      amazon_order_reference_id,
+      seller_note: nil,
+      seller_order_id: nil,
+      payment_service_provider_id: nil,
+      payment_service_provider_order_id: nil,
+      request_payment_authorization: nil,
+      store_name: nil,
+      custom_information: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
+
+      set_order_attributes(amazon_order_reference_id,
+                           # amount:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
+                           # currency_code:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
+                           # platform_id:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
+                           seller_note: seller_note,
+                           seller_order_id: seller_order_id,
+                           payment_service_provider_id: payment_service_provider_id,
+                           payment_service_provider_order_id: payment_service_provider_order_id,
+                           request_payment_authorization: request_payment_authorization,
+                           store_name: store_name,
+                           # order_item_categories:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
+                           custom_information: custom_information,
+                           merchant_id: merchant_id,
+                           mws_auth_token: mws_auth_token)
+    end
+
     private
 
     def call_order_reference_api(

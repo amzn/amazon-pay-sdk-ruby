@@ -52,19 +52,23 @@ class AmazonPayUnitTest < Minitest::Test
   def setup
     @client = AmazonPay::Client.new(MERCHANT_ID, ACCESS_KEY, SECRET_KEY, sandbox: SANDBOX)
     @operation = AmazonPay::Request.new(
-        {'Action' => 'Test'},
-        {},
-        DEFAULT_HASH,
-        MWS_ENDPOINT,
-        SANDBOX_STR,
-        SECRET_KEY,
-        :ENV,
-        nil,
-        nil,
-        nil,
-        true,
-        nil,
-        nil)
+      {'Action' => 'Test'},
+      {},
+      DEFAULT_HASH,
+      MWS_ENDPOINT,
+      SANDBOX_STR,
+      SECRET_KEY,
+      :ENV,
+      nil,
+      nil,
+      nil,
+      true,
+      nil,
+      nil,
+      false,
+      nil,
+      nil
+      )
     @ipn = AmazonPay::IpnHandler.new(IPN_HEADERS, IPN_BODY)
   end
 
@@ -138,10 +142,12 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_service_status
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetServiceStatus&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetServiceStatus&SignatureMethod=HmacSHA256&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_service_status
@@ -149,10 +155,16 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_order_reference_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetOrderReferenceDetails&AddressConsentToken=address_consent_token&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetOrderReferenceDetails"\
+      "&AddressConsentToken=address_consent_token"\
+      "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_order_reference_details(AMAZON_ORDER_REFERENCE_ID, address_consent_token: "address_consent_token")
@@ -160,26 +172,110 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_set_order_reference_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=SetOrderReferenceDetails&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}&OrderReferenceAttributes.OrderTotal.Amount=#{AMOUNT}&OrderReferenceAttributes.OrderTotal.CurrencyCode=USD&OrderReferenceAttributes.SellerNote=seller_note&OrderReferenceAttributes.SellerOrderAttributes.CustomInformation=custom_information&OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id&OrderReferenceAttributes.SellerOrderAttributes.StoreName=store_name&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetOrderReferenceDetails"\
+      "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&OrderReferenceAttributes.OrderTotal.Amount=#{AMOUNT}"\
+      "&OrderReferenceAttributes.OrderTotal.CurrencyCode=USD"\
+      "&OrderReferenceAttributes.RequestPaymentAuthorization=false"\
+      "&OrderReferenceAttributes.SellerNote=seller_note"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.CustomInformation=custom_information"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.1=Antiques"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.StoreName=store_name"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     seller_note = 'seller_note'
     seller_order_id = 'seller_order_id'
     store_name = 'store_name'
     custom_information = 'custom_information'
+    order_item_categories = ["Antiques"]
 
-    res = @client.set_order_reference_details(AMAZON_ORDER_REFERENCE_ID, AMOUNT, store_name: store_name, custom_information: custom_information, seller_note: seller_note, seller_order_id: seller_order_id)
+    res = @client.set_order_reference_details(
+      AMAZON_ORDER_REFERENCE_ID,
+      AMOUNT,
+      store_name: store_name,
+      custom_information: custom_information,
+      order_item_categories: order_item_categories,
+      seller_note: seller_note,
+      request_payment_authorization: false,
+      seller_order_id: seller_order_id
+      )
+    assert_equal(true, res.success)
+  end
+
+  def test_set_order_attributes
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetOrderAttributes"\
+      "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&OrderAttributes.OrderTotal.Amount=#{AMOUNT}"\
+      "&OrderAttributes.OrderTotal.CurrencyCode=USD"\
+      "&OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderId=#{MERCHANT_ID}"\
+      "&OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderOrderId=psp_order_id"\
+      "&OrderAttributes.PlatformId=#{MERCHANT_ID}"\
+      "&OrderAttributes.RequestPaymentAuthorization=false"\
+      "&OrderAttributes.SellerNote=seller_note"\
+      "&OrderAttributes.SellerOrderAttributes.CustomInformation=custom_information"\
+      "&OrderAttributes.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.1=Antiques"\
+      "&OrderAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
+      "&OrderAttributes.SellerOrderAttributes.StoreName=store_name"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    seller_note = 'seller_note'
+    seller_order_id = 'seller_order_id'
+    store_name = 'store_name'
+    custom_information = 'custom_information'
+    order_item_categories = ["Antiques"]
+    currency_code = 'USD'
+    payment_service_provider_id = MERCHANT_ID
+    payment_service_provider_order_id = 'psp_order_id'
+    platform_id = MERCHANT_ID
+
+    res = @client.set_order_attributes(
+      AMAZON_ORDER_REFERENCE_ID,
+      amount: AMOUNT,
+      currency_code: currency_code,
+      store_name: store_name,
+      custom_information: custom_information,
+      order_item_categories: order_item_categories,
+      platform_id: platform_id,
+      payment_service_provider_id: payment_service_provider_id,
+      payment_service_provider_order_id: payment_service_provider_order_id,
+      seller_note: seller_note,
+      request_payment_authorization: false,
+      seller_order_id: seller_order_id
+      )
     assert_equal(true, res.success)
   end
 
   def test_confirm_order_reference
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.confirm_order_reference(AMAZON_ORDER_REFERENCE_ID)
@@ -187,21 +283,44 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_authorize
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=Authorize&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}&AuthorizationAmount.Amount=#{AMOUNT}&AuthorizationAmount.CurrencyCode=USD&AuthorizationReferenceId=#{AUTHORIZATION_REFERENCE_ID}&CaptureNow=capture_now&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&TransactionTimeout=transaction_timeout&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=Authorize&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&AuthorizationAmount.Amount=#{AMOUNT}"\
+      "&AuthorizationAmount.CurrencyCode=USD"\
+      "&AuthorizationReferenceId=#{AUTHORIZATION_REFERENCE_ID}"\
+      "&CaptureNow=capture_now&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&TransactionTimeout=transaction_timeout&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
-    res = @client.authorize(AMAZON_ORDER_REFERENCE_ID, AUTHORIZATION_REFERENCE_ID, AMOUNT, capture_now: "capture_now", transaction_timeout: "transaction_timeout")
+    res = @client.authorize(
+      AMAZON_ORDER_REFERENCE_ID, 
+      AUTHORIZATION_REFERENCE_ID, 
+      AMOUNT, 
+      capture_now: "capture_now", 
+      transaction_timeout: "transaction_timeout"
+      )
     assert_equal(true, res.success)
   end
 
   def test_get_authorization_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetAuthorizationDetails&AmazonAuthorizationId=amazon_authorization_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+    "&Action=GetAuthorizationDetails"\
+    "&AmazonAuthorizationId=amazon_authorization_id"\
+    "&SellerId=#{MERCHANT_ID}"\
+    "&SignatureMethod=HmacSHA256"\
+    "&SignatureVersion=2"\
+    "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_authorization_details("amazon_authorization_id")
@@ -209,10 +328,16 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_close_authorization
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=CloseAuthorization&AmazonAuthorizationId=amazon_authorization_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=CloseAuthorization&AmazonAuthorizationId=amazon_authorization_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.close_authorization("amazon_authorization_id")
@@ -220,10 +345,18 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_capture
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=Capture&AmazonAuthorizationId=amazon_authorization_id&CaptureAmount.Amount=#{AMOUNT}&CaptureAmount.CurrencyCode=USD&CaptureReferenceId=#{CAPTURE_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=Capture&AmazonAuthorizationId=amazon_authorization_id"\
+      "&CaptureAmount.Amount=#{AMOUNT}"\
+      "&CaptureAmount.CurrencyCode=USD&CaptureReferenceId=#{CAPTURE_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.capture("amazon_authorization_id", CAPTURE_REFERENCE_ID, AMOUNT)
@@ -231,10 +364,22 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_capture_provider
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=Capture&AmazonAuthorizationId=amazon_authorization_id&CaptureAmount.Amount=#{AMOUNT}&CaptureAmount.CurrencyCode=USD&CaptureReferenceId=#{CAPTURE_REFERENCE_ID}&ProviderCreditList.member.1.CreditAmount.Amount=10.00&ProviderCreditList.member.1.CreditAmount.CurrencyCode=USD&ProviderCreditList.member.1.ProviderId=1&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=Capture&AmazonAuthorizationId=amazon_authorization_id"\
+      "&CaptureAmount.Amount=#{AMOUNT}"\
+      "&CaptureAmount.CurrencyCode=USD"\
+      "&CaptureReferenceId=#{CAPTURE_REFERENCE_ID}"\
+      "&ProviderCreditList.member.1.CreditAmount.Amount=10.00"\
+      "&ProviderCreditList.member.1.CreditAmount.CurrencyCode=USD"\
+      "&ProviderCreditList.member.1.ProviderId=1"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.capture("amazon_authorization_id", CAPTURE_REFERENCE_ID, AMOUNT, provider_credit_details: [{:provider_id => '1', :amount => '10.00', :currency_code => 'USD'}])
@@ -242,10 +387,15 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_capture_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetCaptureDetails&AmazonCaptureId=amazon_capture_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=GetCaptureDetails&AmazonCaptureId=amazon_capture_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_capture_details("amazon_capture_id")
@@ -253,10 +403,16 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_cancel_order_reference
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=CancelOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=CancelOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.cancel_order_reference(AMAZON_ORDER_REFERENCE_ID)
@@ -264,10 +420,17 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_close_order_reference
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=CloseOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=CloseOrderReference"\
+      "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.close_order_reference(AMAZON_ORDER_REFERENCE_ID)
@@ -275,10 +438,19 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_refund
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=Refund&AmazonCaptureId=amazon_capture_id&RefundAmount.Amount=#{AMOUNT}&RefundAmount.CurrencyCode=USD&RefundReferenceId=#{REFUND_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=Refund&AmazonCaptureId=amazon_capture_id"\
+      "&RefundAmount.Amount=#{AMOUNT}"\
+      "&RefundAmount.CurrencyCode=USD"\
+      "&RefundReferenceId=#{REFUND_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.refund("amazon_capture_id", REFUND_REFERENCE_ID, AMOUNT)
@@ -286,10 +458,23 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_refund_provider
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=Refund&AmazonCaptureId=amazon_capture_id&ProviderCreditReversalList.member.1.CreditReversalAmount.Amount=10.00&ProviderCreditReversalList.member.1.CreditReversalAmount.CurrencyCode=USD&ProviderCreditReversalList.member.1.ProviderId=1&RefundAmount.Amount=#{AMOUNT}&RefundAmount.CurrencyCode=USD&RefundReferenceId=#{REFUND_REFERENCE_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=Refund"\
+      "&AmazonCaptureId=amazon_capture_id"\
+      "&ProviderCreditReversalList.member.1.CreditReversalAmount.Amount=10.00"\
+      "&ProviderCreditReversalList.member.1.CreditReversalAmount.CurrencyCode=USD"\
+      "&ProviderCreditReversalList.member.1.ProviderId=1"\
+      "&RefundAmount.Amount=#{AMOUNT}"\
+      "&RefundAmount.CurrencyCode=USD"\
+      "&RefundReferenceId=#{REFUND_REFERENCE_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.refund("amazon_capture_id", REFUND_REFERENCE_ID, AMOUNT, provider_credit_reversal_details: [{:provider_id => '1', :amount => '10.00', :currency_code => 'USD'}])
@@ -297,10 +482,16 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_refund_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetRefundDetails&AmazonRefundId=amazon_refund_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=GetRefundDetails&AmazonRefundId=amazon_refund_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_refund_details("amazon_refund_id")
@@ -308,10 +499,16 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_billing_agreement_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=GetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_billing_agreement_details(AMAZON_BILLING_AGREEMENT_ID)
@@ -319,10 +516,19 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_set_billing_agreement_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=SetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}&BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation=custom_information&BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId=seller_billing_agreement_id&BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName=store_name&BillingAgreementAttributes.SellerNote=seller_note&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation=custom_information"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId=seller_billing_agreement_id"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName=store_name"\
+      "&BillingAgreementAttributes.SellerNote=seller_note&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     seller_note = 'seller_note'
@@ -330,15 +536,27 @@ class AmazonPayUnitTest < Minitest::Test
     custom_information = 'custom_information'
     seller_billing_agreement_id = 'seller_billing_agreement_id'
 
-    res = @client.set_billing_agreement_details(AMAZON_BILLING_AGREEMENT_ID, store_name: store_name, seller_billing_agreement_id: seller_billing_agreement_id, custom_information: custom_information, seller_note: seller_note)
+    res = @client.set_billing_agreement_details(
+      AMAZON_BILLING_AGREEMENT_ID, 
+      store_name: store_name, 
+      seller_billing_agreement_id: seller_billing_agreement_id, 
+      custom_information: custom_information, 
+      seller_note: seller_note
+      )
     assert_equal(true, res.success)
   end
 
   def test_confirm_billing_agreement
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=ConfirmBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.confirm_billing_agreement(AMAZON_BILLING_AGREEMENT_ID)
@@ -346,10 +564,16 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_validate_billing_agreement
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ValidateBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=ValidateBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.validate_billing_agreement(AMAZON_BILLING_AGREEMENT_ID)
@@ -357,32 +581,77 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_authorize_on_billing_agreement
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=AuthorizeOnBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}&AuthorizationAmount.Amount=#{AMOUNT}&AuthorizationAmount.CurrencyCode=USD&AuthorizationReferenceId=#{AUTHORIZATION_REFERENCE_ID}&CaptureNow=capture_now&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&TransactionTimeout=transaction_timeout&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=AuthorizeOnBillingAgreement"\
+      "&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&AuthorizationAmount.Amount=#{AMOUNT}"\
+      "&AuthorizationAmount.CurrencyCode=USD"\
+      "&AuthorizationReferenceId=#{AUTHORIZATION_REFERENCE_ID}"\
+      "&CaptureNow=capture_now"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&TransactionTimeout=transaction_timeout&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
-    res = @client.authorize_on_billing_agreement(AMAZON_BILLING_AGREEMENT_ID, AUTHORIZATION_REFERENCE_ID, AMOUNT, capture_now: "capture_now", transaction_timeout: "transaction_timeout")
+    res = @client.authorize_on_billing_agreement(
+      AMAZON_BILLING_AGREEMENT_ID, 
+      AUTHORIZATION_REFERENCE_ID, 
+      AMOUNT, 
+      capture_now: "capture_now", 
+      transaction_timeout: "transaction_timeout"
+      )
     assert_equal(true, res.success)
   end
 
   def test_create_order_reference_for_id
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=CreateOrderReferenceForId&ConfirmNow=confirm_now&Id=#{AMAZON_BILLING_AGREEMENT_ID}&IdType=id_type&OrderReferenceAttributes.OrderTotal.Amount=#{AMOUNT}&OrderReferenceAttributes.OrderTotal.CurrencyCode=USD&OrderReferenceAttributes.SellerNote=seller_note&OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=CreateOrderReferenceForId"\
+      "&ConfirmNow=confirm_now"\
+      "&Id=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&IdType=id_type"\
+      "&OrderReferenceAttributes.OrderTotal.Amount=#{AMOUNT}"\
+      "&OrderReferenceAttributes.OrderTotal.CurrencyCode=USD"\
+      "&OrderReferenceAttributes.SellerNote=seller_note"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
-    res = @client.create_order_reference_for_id(AMAZON_BILLING_AGREEMENT_ID, "id_type", confirm_now: "confirm_now", amount: AMOUNT, seller_note: "seller_note", seller_order_id: "seller_order_id")
+    res = @client.create_order_reference_for_id(
+      AMAZON_BILLING_AGREEMENT_ID, 
+      "id_type", 
+      confirm_now: "confirm_now", 
+      amount: AMOUNT, 
+      seller_note: "seller_note", 
+      seller_order_id: "seller_order_id"
+      )
     assert_equal(true, res.success)
   end
 
   def test_close_billing_agreement
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=CloseBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=CloseBillingAgreement"\
+      "&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.close_billing_agreement(AMAZON_BILLING_AGREEMENT_ID)
@@ -390,10 +659,17 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_provider_credit_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetProviderCreditDetails&AmazonProviderCreditId=amazon_provider_credit_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=GetProviderCreditDetails"\
+      "&AmazonProviderCreditId=amazon_provider_credit_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_provider_credit_details("amazon_provider_credit_id")
@@ -401,10 +677,17 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_get_provider_credit_reversal_details
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=GetProviderCreditReversalDetails&AmazonProviderCreditReversalId=amazon_provider_credit_reversal_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=GetProviderCreditReversalDetails"\
+      "&AmazonProviderCreditReversalId=amazon_provider_credit_reversal_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.get_provider_credit_reversal_details("amazon_provider_credit_reversal_id")
@@ -412,10 +695,19 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_reverse_provider_credit
-    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ReverseProviderCredit&AmazonProviderCreditId=amazon_provider_credit_id&CreditReversalAmount.Amount=#{AMOUNT}&CreditReversalAmount.CurrencyCode=USD&CreditReversalReferenceId=credit_reversal_reference_id&SellerId=#{MERCHANT_ID}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=ReverseProviderCredit&AmazonProviderCreditId=amazon_provider_credit_id"\
+      "&CreditReversalAmount.Amount=#{AMOUNT}"\
+      "&CreditReversalAmount.CurrencyCode=USD"\
+      "&CreditReversalReferenceId=credit_reversal_reference_id"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
     post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
 
-    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}&Signature=#{@operation.send :sign, post_body}",
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.reverse_provider_credit("amazon_provider_credit_id", "credit_reversal_reference_id", AMOUNT)
@@ -498,6 +790,13 @@ class AmazonPayUnitTest < Minitest::Test
     res = @ipn.send :https_get, 'https://test.com/test.pem'
 
     assert_equal('200', res.code)
+  end
+
+  def test_sanitize_response_data
+    unsanitized_file = File.read("./test/unsanitized_log.txt")
+    sanitized_file = File.read("./test/sanitized_log.txt")
+    
+    assert_equal(sanitized_file, AmazonPay.sanitize_response_data(unsanitized_file))
   end
 
   def test_download_cert_error

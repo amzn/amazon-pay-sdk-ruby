@@ -1,14 +1,14 @@
 require 'time'
+require 'logger'
+require 'stringio'
 
 module AmazonPay
-
   # AmazonPay API
   #
   # This client allows you to make all the necessary API calls
   # to integrate with AmazonPay. This client only
   # uses the standard Ruby library and is not dependant on Rails.
   class Client
-
     attr_reader(
       :merchant_id,
       :access_key,
@@ -19,14 +19,19 @@ module AmazonPay
       :platform_id,
       :throttle,
       :application_name,
-      :application_version)
+      :application_version,
+      :log_enabled,
+      :log_file_name,
+      :log_level
+    )
 
     attr_accessor(
       :sandbox,
       :proxy_addr,
       :proxy_port,
       :proxy_user,
-      :proxy_pass)
+      :proxy_pass
+    )
 
     # API keys are located at:
     # @see https://sellercentral.amazon.com
@@ -40,26 +45,32 @@ module AmazonPay
     # @optional throttle [Boolean] Default: true
     # @optional application_name [String]
     # @optional application_version [String]
+    # @optional log_enabled [Boolean] Default: false
+    # @optional log_file_name [String]
+    # @optional log_level [Symbol] Default: DEBUG
     # @optional proxy_addr [String]
     # @optional proxy_port [String]
     # @optional proxy_user [String]
     # @optional proxy_pass [String]
     def initialize(
-            merchant_id,
-            access_key,
-            secret_key,
-            sandbox: false,
-            currency_code: :usd,
-            region: :na,
-            platform_id: nil,
-            throttle: true,
-            application_name: nil,
-            application_version: nil,
-            proxy_addr: :ENV,
-            proxy_port: nil,
-            proxy_user: nil,
-            proxy_pass: nil)
-
+      merchant_id,
+      access_key,
+      secret_key,
+      sandbox: false,
+      currency_code: :usd,
+      region: :na,
+      platform_id: nil,
+      throttle: true,
+      application_name: nil,
+      application_version: nil,
+      proxy_addr: :ENV,
+      proxy_port: nil,
+      proxy_user: nil,
+      proxy_pass: nil,
+      log_enabled: false,
+      log_file_name: nil,
+      log_level: :DEBUG
+    )
       @merchant_id = merchant_id
       @access_key = access_key
       @secret_key = secret_key
@@ -84,6 +95,10 @@ module AmazonPay
         'Timestamp' => Time.now.utc.iso8601,
         'Version' => AmazonPay::API_VERSION
       }
+
+      @log_enabled = log_enabled
+      @log_level = log_level
+      @log_file_name = log_file_name
 
       @default_hash['PlatformId'] = @platform_id if @platform_id
     end
@@ -115,19 +130,20 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def create_order_reference_for_id(
-            id,
-            id_type,
-            inherit_shipping_address: nil,
-            confirm_now: nil,
-            amount: nil,
-            currency_code: @currency_code,
-            platform_id: nil,
-            seller_note: nil,
-            seller_order_id: nil,
-            store_name: nil,
-            custom_information: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      id,
+      id_type,
+      inherit_shipping_address: nil,
+      confirm_now: nil,
+      amount: nil,
+      currency_code: @currency_code,
+      platform_id: nil,
+      seller_note: nil,
+      seller_order_id: nil,
+      store_name: nil,
+      custom_information: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'CreateOrderReferenceForId',
@@ -159,10 +175,11 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_billing_agreement_details(
-            amazon_billing_agreement_id,
-            address_consent_token: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_billing_agreement_id,
+      address_consent_token: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'GetBillingAgreementDetails',
@@ -190,14 +207,15 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def set_billing_agreement_details(
-            amazon_billing_agreement_id,
-            platform_id: nil,
-            seller_note: nil,
-            seller_billing_agreement_id: nil,
-            custom_information: nil,
-            store_name: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_billing_agreement_id,
+      platform_id: nil,
+      seller_note: nil,
+      seller_billing_agreement_id: nil,
+      custom_information: nil,
+      store_name: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'SetBillingAgreementDetails',
@@ -224,9 +242,10 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def confirm_billing_agreement(
-            amazon_billing_agreement_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_billing_agreement_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'ConfirmBillingAgreement',
@@ -248,9 +267,10 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def validate_billing_agreement(
-            amazon_billing_agreement_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_billing_agreement_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'ValidateBillingAgreement',
@@ -285,22 +305,23 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def authorize_on_billing_agreement(
-            amazon_billing_agreement_id,
-            authorization_reference_id,
-            amount,
-            currency_code: @currency_code,
-            seller_authorization_note: nil,
-            transaction_timeout: nil,
-            capture_now: false,
-            soft_descriptor: nil,
-            seller_note: nil,
-            platform_id: nil,
-            custom_information: nil,
-            seller_order_id: nil,
-            store_name: nil,
-            inherit_shipping_address: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_billing_agreement_id,
+      authorization_reference_id,
+      amount,
+      currency_code: @currency_code,
+      seller_authorization_note: nil,
+      transaction_timeout: nil,
+      capture_now: false,
+      soft_descriptor: nil,
+      seller_note: nil,
+      platform_id: nil,
+      custom_information: nil,
+      seller_order_id: nil,
+      store_name: nil,
+      inherit_shipping_address: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'AuthorizeOnBillingAgreement',
@@ -337,10 +358,11 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def close_billing_agreement(
-            amazon_billing_agreement_id,
-            closure_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_billing_agreement_id,
+      closure_reason: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'CloseBillingAgreement',
@@ -363,10 +385,11 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_order_reference_details(
-            amazon_order_reference_id,
-            address_consent_token: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_order_reference_id,
+      address_consent_token: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'GetOrderReferenceDetails',
@@ -391,21 +414,26 @@ module AmazonPay
     # @optional platform_id [String]
     # @optional seller_note [String]
     # @optional seller_order_id [String]
+    # @optional request_payment_authorization [Boolean]
     # @optional store_name [String]
+    # @optional order_item_categories Array[String]
     # @optional custom_information [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def set_order_reference_details(
-            amazon_order_reference_id,
-            amount,
-            currency_code: @currency_code,
-            platform_id: nil,
-            seller_note: nil,
-            seller_order_id: nil,
-            store_name: nil,
-            custom_information: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_order_reference_id,
+      amount,
+      currency_code: @currency_code,
+      platform_id: nil,
+      seller_note: nil,
+      seller_order_id: nil,
+      request_payment_authorization: nil,
+      store_name: nil,
+      order_item_categories: nil,
+      custom_information: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'SetOrderReferenceDetails',
@@ -417,12 +445,86 @@ module AmazonPay
 
       optional = {
         'OrderReferenceAttributes.PlatformId' => platform_id,
+        'OrderReferenceAttributes.RequestPaymentAuthorization' => request_payment_authorization,
         'OrderReferenceAttributes.SellerNote' => seller_note,
         'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => seller_order_id,
         'OrderReferenceAttributes.SellerOrderAttributes.StoreName' => store_name,
         'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
         'MWSAuthToken' => mws_auth_token
       }
+
+      if order_item_categories
+        optional.merge!(
+          get_categories_list(
+            'OrderReferenceAttributes',
+            order_item_categories
+          )
+        )
+      end
+
+      operation(parameters, optional)
+    end
+
+    # Sets order attributes such as the order total and a description
+    # for the order
+    # @see https://pay.amazon.com/documentation/apireference/201751630#201751960
+    # @param amazon_order_reference_id [String]
+    # @optional amount [String]
+    # @optional currency_code [String]
+    # @optional platform_id [String]
+    # @optional seller_note [String]
+    # @optional seller_order_id [String]
+    # @optional request_payment_authorization [Boolean]
+    # @optional store_name [String]
+    # @optional order_item_categories Array[String]
+    # @optional custom_information [String]
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def set_order_attributes(
+      amazon_order_reference_id,
+      amount: nil,
+      currency_code: nil,
+      platform_id: nil,
+      seller_note: nil,
+      seller_order_id: nil,
+      payment_service_provider_id: nil,
+      payment_service_provider_order_id: nil,
+      request_payment_authorization: nil,
+      store_name: nil,
+      order_item_categories: nil,
+      custom_information: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
+
+      parameters = {
+        'Action' => 'SetOrderAttributes',
+        'SellerId' => merchant_id,
+        'AmazonOrderReferenceId' => amazon_order_reference_id
+      }
+
+      optional = {
+        'OrderAttributes.OrderTotal.Amount' => amount,
+        'OrderAttributes.OrderTotal.CurrencyCode' => currency_code,
+        'OrderAttributes.PlatformId' => platform_id,
+        'OrderAttributes.SellerNote' => seller_note,
+        'OrderAttributes.SellerOrderAttributes.SellerOrderId' => seller_order_id,
+        'OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderId' => payment_service_provider_id,
+        'OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderOrderId' => payment_service_provider_order_id,
+        'OrderAttributes.RequestPaymentAuthorization' => request_payment_authorization,
+        'OrderAttributes.SellerOrderAttributes.StoreName' => store_name,
+        'OrderAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
+        'MWSAuthToken' => mws_auth_token
+      }
+
+      if order_item_categories
+        optional.merge!(
+          get_categories_list(
+            'OrderAttributes',
+            order_item_categories
+          )
+        )
+      end
 
       operation(parameters, optional)
     end
@@ -434,9 +536,10 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def confirm_order_reference(
-            amazon_order_reference_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_order_reference_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'ConfirmOrderReference',
@@ -458,10 +561,11 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def cancel_order_reference(
-            amazon_order_reference_id,
-            cancelation_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_order_reference_id,
+      cancelation_reason: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'CancelOrderReference',
@@ -492,17 +596,18 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def authorize(
-            amazon_order_reference_id,
-            authorization_reference_id,
-            amount,
-            currency_code: @currency_code,
-            seller_authorization_note: nil,
-            transaction_timeout: nil,
-            capture_now: nil,
-            soft_descriptor: nil,
-            provider_credit_details: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_order_reference_id,
+      authorization_reference_id,
+      amount,
+      currency_code: @currency_code,
+      seller_authorization_note: nil,
+      transaction_timeout: nil,
+      capture_now: nil,
+      soft_descriptor: nil,
+      provider_credit_details: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'Authorize',
@@ -533,9 +638,10 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_authorization_details(
-            amazon_authorization_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_authorization_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'GetAuthorizationDetails',
@@ -562,15 +668,16 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def capture(
-            amazon_authorization_id,
-            capture_reference_id,
-            amount,
-            currency_code: @currency_code,
-            seller_capture_note: nil,
-            soft_descriptor: nil,
-            provider_credit_details: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_authorization_id,
+      capture_reference_id,
+      amount,
+      currency_code: @currency_code,
+      seller_capture_note: nil,
+      soft_descriptor: nil,
+      provider_credit_details: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'Capture',
@@ -599,9 +706,10 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_capture_details(
-            amazon_capture_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_capture_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'GetCaptureDetails',
@@ -628,15 +736,16 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def refund(
-            amazon_capture_id,
-            refund_reference_id,
-            amount,
-            currency_code: @currency_code,
-            seller_refund_note: nil,
-            soft_descriptor: nil,
-            provider_credit_reversal_details: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_capture_id,
+      refund_reference_id,
+      amount,
+      currency_code: @currency_code,
+      seller_refund_note: nil,
+      soft_descriptor: nil,
+      provider_credit_reversal_details: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'Refund',
@@ -664,9 +773,10 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_refund_details(
-            amazon_refund_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_refund_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'GetRefundDetails',
@@ -688,10 +798,11 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def close_authorization(
-            amazon_authorization_id,
-            closure_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_authorization_id,
+      closure_reason: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'CloseAuthorization',
@@ -716,10 +827,11 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def close_order_reference(
-            amazon_order_reference_id,
-            closure_reason: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_order_reference_id,
+      closure_reason: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'CloseOrderReference',
@@ -739,42 +851,44 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_provider_credit_details(
-            amazon_provider_credit_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_provider_credit_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
-        parameters = {
-          'Action' => 'GetProviderCreditDetails',
-          'SellerId' => merchant_id,
-          'AmazonProviderCreditId' => amazon_provider_credit_id
-        }
+      parameters = {
+        'Action' => 'GetProviderCreditDetails',
+        'SellerId' => merchant_id,
+        'AmazonProviderCreditId' => amazon_provider_credit_id
+      }
 
-        optional = {
-          'MWSAuthToken' => mws_auth_token
-        }
+      optional = {
+        'MWSAuthToken' => mws_auth_token
+      }
 
-        operation(parameters, optional)
+      operation(parameters, optional)
     end
 
     # @param amazon_provider_credit_reversal_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_provider_credit_reversal_details(
-            amazon_provider_credit_reversal_id,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_provider_credit_reversal_id,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
-        parameters = {
-          'Action' => 'GetProviderCreditReversalDetails',
-          'SellerId' => merchant_id,
-          'AmazonProviderCreditReversalId' => amazon_provider_credit_reversal_id
-        }
+      parameters = {
+        'Action' => 'GetProviderCreditReversalDetails',
+        'SellerId' => merchant_id,
+        'AmazonProviderCreditReversalId' => amazon_provider_credit_reversal_id
+      }
 
-        optional = {
-          'MWSAuthToken' => mws_auth_token
-        }
+      optional = {
+        'MWSAuthToken' => mws_auth_token
+      }
 
-        operation(parameters, optional)
+      operation(parameters, optional)
     end
 
     # @param amazon_provider_credit_id [String]
@@ -785,13 +899,14 @@ module AmazonPay
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def reverse_provider_credit(
-            amazon_provider_credit_id,
-            credit_reversal_reference_id,
-            amount,
-            currency_code: @currency_code,
-            credit_reversal_note: nil,
-            merchant_id: @merchant_id,
-            mws_auth_token: nil)
+      amazon_provider_credit_id,
+      credit_reversal_reference_id,
+      amount,
+      currency_code: @currency_code,
+      credit_reversal_note: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
 
       parameters = {
         'Action' => 'ReverseProviderCredit',
@@ -814,12 +929,12 @@ module AmazonPay
 
     def region_hash
       {
-        :jp => 'mws.amazonservices.jp',
-        :uk => 'mws-eu.amazonservices.com',
-        :de => 'mws-eu.amazonservices.com',
-        :eu => 'mws-eu.amazonservices.com',
-        :us => 'mws.amazonservices.com',
-        :na => 'mws.amazonservices.com'
+        jp: 'mws.amazonservices.jp',
+        uk: 'mws-eu.amazonservices.com',
+        de: 'mws-eu.amazonservices.com',
+        eu: 'mws-eu.amazonservices.com',
+        us: 'mws.amazonservices.com',
+        na: 'mws.amazonservices.com'
       }
     end
 
@@ -828,14 +943,14 @@ module AmazonPay
     # API call.
     def set_provider_credit_details(provider_credit_details)
       member_details = {}
-      provider_credit_details.each_with_index { |val, index|
+      provider_credit_details.each_with_index do |val, index|
         member = index + 1
         member_details["ProviderCreditList.member.#{member}.ProviderId"] = val[:provider_id]
         member_details["ProviderCreditList.member.#{member}.CreditAmount.Amount"] = val[:amount]
         member_details["ProviderCreditList.member.#{member}.CreditAmount.CurrencyCode"] = val[:currency_code]
-      }
+      end
 
-      return member_details
+      member_details
     end
 
     # This method builds the provider credit reversal
@@ -843,33 +958,45 @@ module AmazonPay
     # API call.
     def set_provider_credit_reversal_details(provider_credit_reversal_details)
       member_details = {}
-      provider_credit_reversal_details.each_with_index { |val, index|
+      provider_credit_reversal_details.each_with_index do |val, index|
         member = index + 1
         member_details["ProviderCreditReversalList.member.#{member}.ProviderId"] = val[:provider_id]
         member_details["ProviderCreditReversalList.member.#{member}.CreditReversalAmount.Amount"] = val[:amount]
         member_details["ProviderCreditReversalList.member.#{member}.CreditReversalAmount.CurrencyCode"] = val[:currency_code]
-      }
+      end
 
-      return member_details
+      member_details
+    end
+
+    def get_categories_list(attribute_key, categories)
+      list = {}
+
+      categories.each_with_index do |val, index|
+          list.merge!({"#{attribute_key}.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.#{index + 1}" => val})
+      end   
+
+      list
     end
 
     def operation(parameters, optional)
       AmazonPay::Request.new(
-          parameters,
-          optional,
-          @default_hash,
-          @mws_endpoint,
-          @sandbox_str,
-          @secret_key,
-          @proxy_addr,
-          @proxy_port,
-          @proxy_user,
-          @proxy_pass,
-          @throttle,
-          @application_name,
-          @application_version).send_post
+        parameters,
+        optional,
+        @default_hash,
+        @mws_endpoint,
+        @sandbox_str,
+        @secret_key,
+        @proxy_addr,
+        @proxy_port,
+        @proxy_user,
+        @proxy_pass,
+        @throttle,
+        @application_name,
+        @application_version,
+        @log_enabled,
+        @log_file_name,
+        @log_level
+      ).send_post
     end
-
   end
-
 end

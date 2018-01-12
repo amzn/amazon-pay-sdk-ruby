@@ -4,9 +4,10 @@ require 'net/http'
 require 'net/https'
 require 'openssl'
 require 'uri'
+require 'logger'
+require 'stringio'
 
 module AmazonPay
-
   class IpnWasNotAuthenticError < StandardError
   end
 
@@ -17,19 +18,26 @@ module AmazonPay
   # there are many helper methods in place to extract information received
   # from the ipn notification.
   class IpnHandler
-
-    SIGNABLE_KEYS = [
-      'Message',
-      'MessageId',
-      'Timestamp',
-      'TopicArn',
-      'Type',
+    SIGNABLE_KEYS = %w[
+      Message
+      MessageId
+      Timestamp
+      TopicArn
+      Type
     ].freeze
 
-    COMMON_NAME = 'sns.amazonaws.com'
+    COMMON_NAME = 'sns.amazonaws.com'.freeze
 
-    attr_reader(:headers, :body)
-    attr_accessor(:proxy_addr, :proxy_port, :proxy_user, :proxy_pass)
+    attr_reader(
+      :headers,
+      :body
+    )
+    attr_accessor(
+      :proxy_addr,
+      :proxy_port,
+      :proxy_user,
+      :proxy_pass
+    )
 
     # @param headers [request.headers]
     # @param body [request.body.read]
@@ -38,12 +46,16 @@ module AmazonPay
     # @optional proxy_user [String]
     # @optional proxy_pass [String]
     def initialize(
-            headers,
-            body,
-            proxy_addr: :ENV,
-            proxy_port: nil,
-            proxy_user: nil,
-            proxy_pass: nil)
+      headers,
+      body,
+      proxy_addr: :ENV,
+      proxy_port: nil,
+      proxy_user: nil,
+      proxy_pass: nil,
+      log_enabled: false,
+      log_file_name: nil,
+      log_level: :DEBUG
+    )
 
       @body = body
       @raw = parse_from(@body)
@@ -52,23 +64,30 @@ module AmazonPay
       @proxy_port = proxy_port
       @proxy_user = proxy_user
       @proxy_pass = proxy_pass
+
+      @log_enabled = log_enabled
+      if @log_enabled
+        log_set = AmazonPay::LogInitializer.new(
+          log_file_name,
+          log_level
+        )
+        @logger = log_set.create_logger
+      end
     end
 
     # This method will authenticate the ipn message sent from Amazon.
     # It will return true if everything is verified. It will raise an
     # error message if verification fails.
     def authentic?
-      begin
-        decoded_from_base64 = Base64.decode64(signature)
-        validate_header
-        validate_subject(get_certificate.subject)
-        public_key = get_public_key_from(get_certificate)
-        verify_public_key(public_key, decoded_from_base64, canonical_string)
+      decoded_from_base64 = Base64.decode64(signature)
+      validate_header
+      validate_subject(get_certificate.subject)
+      public_key = get_public_key_from(get_certificate)
+      verify_public_key(public_key, decoded_from_base64, canonical_string)
 
-        return true
-      rescue IpnWasNotAuthenticError => e
-        raise e.message
-      end
+      return true
+    rescue IpnWasNotAuthenticError => e
+      raise e.message
     end
 
     def type
@@ -108,27 +127,27 @@ module AmazonPay
     end
 
     def notification_type
-      parse_from(@raw['Message'])["NotificationType"]
+      parse_from(@raw['Message'])['NotificationType']
     end
 
     def seller_id
-      parse_from(@raw['Message'])["SellerId"]
+      parse_from(@raw['Message'])['SellerId']
     end
 
     def environment
-      parse_from(@raw['Message'])["ReleaseEnvironment"]
+      parse_from(@raw['Message'])['ReleaseEnvironment']
     end
 
     def version
-      parse_from(@raw['Message'])["Version"]
+      parse_from(@raw['Message'])['Version']
     end
 
     def notification_data
-      parse_from(@raw['Message'])["NotificationData"]
+      parse_from(@raw['Message'])['NotificationData']
     end
 
     def message_timestamp
-      parse_from(@raw['Message'])["Timestamp"]
+      parse_from(@raw['Message'])['Timestamp']
     end
 
     def parse_from(json)
@@ -150,7 +169,7 @@ module AmazonPay
       text = ''
       SIGNABLE_KEYS.each do |key|
         value = @raw[key]
-        next if value.nil? or value.empty?
+        next if value.nil? || value.empty?
         text << key << "\n"
         text << value << "\n"
       end
@@ -170,8 +189,12 @@ module AmazonPay
       tries = 0
       begin
         resp = https_get(url)
+        if @log_enabled
+          data = AmazonPay::Sanitize.new(resp.body)
+          @logger.debug(data.sanitize_response_data)          
+        end
         resp.body
-      rescue => error
+      rescue StandardError => error
         tries += 1
         retry if tries < 3
         raise error
@@ -193,7 +216,7 @@ module AmazonPay
       unless
         @headers['x-amz-sns-message-type'] == 'Notification'
       then
-        msg = "Error - Header does not contain x-amz-sns-message-type header"
+        msg = 'Error - Header does not contain x-amz-sns-message-type header'
         raise IpnWasNotAuthenticError, msg
       end
     end
@@ -203,7 +226,7 @@ module AmazonPay
       unless
         subject[4][1] == COMMON_NAME
       then
-        msg = "Error - Unable to verify certificate subject issued by Amazon"
+        msg = 'Error - Unable to verify certificate subject issued by Amazon'
         raise IpnWasNotAuthenticError, msg
       end
     end
@@ -212,11 +235,9 @@ module AmazonPay
       unless
         public_key.verify(OpenSSL::Digest::SHA1.new, decoded_signature, signed_string)
       then
-        msg = "Error - Unable to verify public key with signature and signed string"
+        msg = 'Error - Unable to verify public key with signature and signed string'
         raise IpnWasNotAuthenticError, msg
       end
     end
-
   end
-
 end
