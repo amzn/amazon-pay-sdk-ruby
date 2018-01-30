@@ -378,6 +378,72 @@ module AmazonPay
       operation(parameters, optional)
     end
 
+    # Allows the search of any Amazon Pay order made using secondary
+    # seller order IDs generated manually, a solution provider, or a custom
+    # order fulfillment service.
+    # @param query_id [String]
+    # @param query_id_type [String]
+    # @optional created_time_range_start [String]
+    # @optional created_time_range_end [String]
+    # @optional sort_order [String]
+    # @optional page_size [Integer]
+    # @optional order_reference_status_list_filter Array[String]
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def list_order_reference(
+      query_id,
+      query_id_type,
+      created_time_range_start: nil,
+      created_time_range_end: nil,
+      sort_order: nil,
+      page_size: nil,
+      order_reference_status_list_filter: nil,
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
+
+      payment_domain = payment_domain_hash[@region]
+
+      parameters = {
+        'Action' => 'ListOrderReference',
+        'SellerId' => merchant_id,
+        'QueryId' => query_id,
+        'QueryIdType' => query_id_type
+      }
+
+      optional = {
+        'CreatedTimeRange.StartTime' => created_time_range_start,
+        'CreatedTimeRange.EndTime' => created_time_range_end,
+        'SortOrder' => sort_order,
+        'PageSize' => page_size,
+        'PaymentDomain' => payment_domain,
+        'MWSAuthToken' => mws_auth_token
+      }
+
+      if order_reference_status_list_filter
+        order_reference_status_list_filter.each_with_index do |val, index|
+          optional_key = "OrderReferenceStatusListFilter.OrderReferenceStatus.#{index + 1}"
+          optional[optional_key] = val
+        end
+      end
+
+      operation(parameters, optional)
+    end
+
+    # When ListOrderReference returns multiple pages
+    # you can continue by using the NextPageToken returned
+    # by ListOrderReference
+    # @param next_page_token [String]
+    def list_order_reference_by_next_token(next_page_token)
+      parameters = {
+        'Action' => 'ListOrderReferenceByNextToken',
+        'SellerId' => @merchant_id,
+        'NextPageToken' => next_page_token
+      }
+
+      operation(parameters, {})
+    end
+
     # Returns details about the Order Reference object and its current state
     # @see https://pay.amazon.com/documentation/apireference/201751630#201751970
     # @param amazon_order_reference_id [String]
@@ -935,6 +1001,17 @@ module AmazonPay
         eu: 'mws-eu.amazonservices.com',
         us: 'mws.amazonservices.com',
         na: 'mws.amazonservices.com'
+      }
+    end
+
+    def payment_domain_hash
+      {
+        jp: 'FE_JPY',
+        uk: 'EU_GBP',
+        de: 'EU_EUR',
+        eu: 'EU_EUR',
+        us: 'NA_USD',
+        na: 'NA_USD'
       }
     end
 

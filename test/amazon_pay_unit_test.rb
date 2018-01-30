@@ -14,6 +14,13 @@ class AmazonPayUnitTest < Minitest::Test
   REFUND_REFERENCE_ID = 'REFUND_REFERENCE_ID'
   MWS_ENDPOINT = "mws.amazonservices.com"
   SANDBOX_STR = "OffAmazonPayments_Sandbox"
+  NEXT_PAGE_TOKEN = '1eUc0QkJMVnJpcGgrbDNHclpIUT09IiwibWFya2V0cGxhY2VJZCI6IkEzQlhCMFlOM1hIMTdIIn0'
+  START_TIME = '2017-05-20T03:23:21.923Z'
+  START_TIME_ENCODED = '2017-05-20T03%3A23%3A21.923Z'
+  END_TIME = '2017-05-27T03:23:21.923Z'
+  END_TIME_ENCODED = '2017-05-27T03%3A23%3A21.923Z'
+  QUERY_ID = '1234-example-order'
+  QUERY_ID_TYPE = 'SellerOrderId'
   DEFAULT_HASH = {
     'AWSAccessKeyId' => ACCESS_KEY,
     'SignatureMethod' => 'HmacSHA256',
@@ -68,7 +75,7 @@ class AmazonPayUnitTest < Minitest::Test
       false,
       nil,
       nil
-      )
+    )
     @ipn = AmazonPay::IpnHandler.new(IPN_HEADERS, IPN_BODY)
   end
 
@@ -209,7 +216,7 @@ class AmazonPayUnitTest < Minitest::Test
       seller_note: seller_note,
       request_payment_authorization: false,
       seller_order_id: seller_order_id
-      )
+    )
     assert_equal(true, res.success)
   end
 
@@ -262,7 +269,7 @@ class AmazonPayUnitTest < Minitest::Test
       seller_note: seller_note,
       request_payment_authorization: false,
       seller_order_id: seller_order_id
-      )
+    )
     assert_equal(true, res.success)
   end
 
@@ -279,6 +286,61 @@ class AmazonPayUnitTest < Minitest::Test
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.confirm_order_reference(AMAZON_ORDER_REFERENCE_ID)
+    assert_equal(true, res.success)
+  end
+
+  def test_list_order_reference
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=ListOrderReference"\
+      "&CreatedTimeRange.EndTime=#{END_TIME_ENCODED}"\
+      "&CreatedTimeRange.StartTime=#{START_TIME_ENCODED}"\
+      "&OrderReferenceStatusListFilter.OrderReferenceStatus.1=canceled"\
+      "&OrderReferenceStatusListFilter.OrderReferenceStatus.2=open"\
+      "&OrderReferenceStatusListFilter.OrderReferenceStatus.3=closed"\
+      "&PageSize=1"\
+      "&PaymentDomain=NA_USD"\
+      "&QueryId=#{QUERY_ID}"\
+      "&QueryIdType=#{QUERY_ID_TYPE}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&SortOrder=Descending"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.list_order_reference(
+      QUERY_ID,
+      QUERY_ID_TYPE,
+      created_time_range_start: START_TIME,
+      created_time_range_end: END_TIME,
+      sort_order: 'Descending',
+      page_size: 1,
+      order_reference_status_list_filter: ['canceled', 'open', 'closed'],
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_list_order_reference_by_next_token
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=ListOrderReferenceByNextToken"\
+      "&NextPageToken=#{NEXT_PAGE_TOKEN}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.list_order_reference_by_next_token(
+      NEXT_PAGE_TOKEN
+    )
     assert_equal(true, res.success)
   end
 
@@ -305,7 +367,7 @@ class AmazonPayUnitTest < Minitest::Test
       AMOUNT, 
       capture_now: "capture_now", 
       transaction_timeout: "transaction_timeout"
-      )
+    )
     assert_equal(true, res.success)
   end
 
@@ -542,7 +604,7 @@ class AmazonPayUnitTest < Minitest::Test
       seller_billing_agreement_id: seller_billing_agreement_id, 
       custom_information: custom_information, 
       seller_note: seller_note
-      )
+    )
     assert_equal(true, res.success)
   end
 
@@ -605,7 +667,7 @@ class AmazonPayUnitTest < Minitest::Test
       AMOUNT, 
       capture_now: "capture_now", 
       transaction_timeout: "transaction_timeout"
-      )
+    )
     assert_equal(true, res.success)
   end
 
@@ -636,7 +698,7 @@ class AmazonPayUnitTest < Minitest::Test
       amount: AMOUNT, 
       seller_note: "seller_note", 
       seller_order_id: "seller_order_id"
-      )
+    )
     assert_equal(true, res.success)
   end
 
@@ -796,7 +858,8 @@ class AmazonPayUnitTest < Minitest::Test
     unsanitized_file = File.read("./test/unsanitized_log.txt")
     sanitized_file = File.read("./test/sanitized_log.txt")
     
-    assert_equal(sanitized_file, AmazonPay.sanitize_response_data(unsanitized_file))
+    data = AmazonPay::Sanitize.new(unsanitized_file)
+    assert_equal(sanitized_file, data.sanitize_response_data)
   end
 
   def test_download_cert_error

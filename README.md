@@ -113,6 +113,101 @@ client.get_order_reference_details(
 
 ```
 
+Below is an example on how to query using the Seller Order ID using the
+ListOrderReference API call:
+
+```ruby
+require 'amazon_pay'
+
+# Your Amazon Pay keys are
+# available in your Seller Central account
+merchant_id = 'YOUR_MERCHANT_ID'
+access_key = 'YOUR_ACCESS_KEY'
+secret_key = 'YOUR_SECRET_KEY'
+
+client = AmazonPay::Client.new(
+  merchant_id,
+  access_key,
+  secret_key
+)
+
+seller_order_id = 'merchant_id:Test 4321'
+# These are examples of input 
+# for the option values
+query_id = '1234-example-order'
+query_id_type = 'SellerOrderId'
+created_time_range_start_time = '2017-09-20T17:39:27.925Z'
+created_time_range_end_time = '2017-09-25T17:39:27.925Z'
+sort_order = 'Descending'
+order_reference_status_list_filter = ['canceled', 'open', 'closed']
+page_size = 1
+
+response = client.list_order_reference(
+  query_id,
+  query_id_type,
+  created_time_range_start: created_time_range_start_time,
+  created_time_range_end: created_time_range_end_time,
+  sort_order: sort_order,
+  page_size: page_size,
+  order_reference_status_list_filter: order_reference_status_list_filter,
+  mws_auth_token: nil
+  )
+
+```
+
+Below is an example on how to query using the next token received
+from ListOrderReference using the ListOrderReferenceByNextToken 
+API call:
+
+```ruby
+require 'amazon_pay'
+
+# Your Amazon Pay keys are
+# available in your Seller Central account
+merchant_id = 'YOUR_MERCHANT_ID'
+access_key = 'YOUR_ACCESS_KEY'
+secret_key = 'YOUR_SECRET_KEY'
+
+client = AmazonPay::Client.new(
+  merchant_id,
+  access_key,
+  secret_key
+)
+
+response = client.list_order_reference_by_next_token(
+  'eyJuZXh0UGFnZVRva2VuIjoiQUFBQUFBQUFBQUZXL0x3dE50TDBTUWhla29JVk5VNWgvbURhSWJXc1E2MnlVdzVuaURCTURFN2g4U0xja3EweWpCSlY4S2pVRHFJWC9wcDBKOG8rMnJDcFREa2xjWjViVmJweFhPS2xuYUJXL0pQeTB4UGIwNjlUU3dlcnVSSHB5TUREMUV2aiswM3pvY3FWbkRZL0p3VTVpWUV4cUdaeGpYbzg0WVI2NkVmek9tbTRjVUZSbDNJL2ZOOC9kMWRuMkMyaWxaMy9nNlRtU2cvMG9CdTJ2U1FVVy9rcThxc1dmS1dQNkFQaGhKK08xOFlmVko5NS9WWFRPeXliMWJVdEl0U3h5K2FlYlN1YXBoWHZybGdqR3BERE1zeFhsRFozLzlsc2hPNE1lZTQ2MlVIU3lndFVjN0htLzQ2NFFzVTlMRmE0N0UrZ05hOVRSeU1XMTJ5ZU1Mc3ZydkdES2lTcFVuSTB1Rk83RnZFK01GbzdOQUtsWUhSbDVsSUgrSy9LYmJhQ2lsLzZxaFdwbkJjK3J6WmQrOVg0ZmRrWG9YcWpXK3oyVTdUTUZWVjFkaEVnOHZ0cmgvaGxHb0N6ZUZiSVg3SWVNOCtwS0pkbWtPdjlpUUlxbTNYM1hZQXBTamtEMUtWNnNaTWsvNkphREpQazhoanVUVjFMV1JiZVREeVQ2eElBeVRJeFIrOXZkTlozYW1YdHA4cklxRGNSMzh2aTdwTi9UYXo3WFR2Y1c0aDF3UEFCOTVNU3J5WmJTYUpVMjEybVZhclZwdFZ4aEMyWlRBVUR6MkltRlZUbU05bXZRL1ZWNEhWSExQZE9kQ1BrVFVWWHFZNGo4Z3Q3YTlUdkhKWlFyQzd2Q2o1djUrc0RNNkZXT0gwWWZscW1wV0NZc2ZGMko0V0dFcnkvS3ZMQTZHWm0xVitxVmVwd21lZEx5bDgzZXdFS0JUbDhVTkVTZklIRW5ETVdaRHBORmdXNmhVaUNzWTFZbEdwemxnZUpUbUpVR1lBQXRrY3BxQjMrb29rRCtBTWRPM05lZFpQeVYvM1d2M1B6dTI1VkVHQVNWRU90RDVieTl3WUUxczQ1bU83alZWa1JJakxlMndnQUNJTTlVc3hnZXlGRDZOY1dNclk5VWZ2UTNiKzZibjdqU0ljcTYrdkgrWG1Zb0V4ekM4K1pHWDVJcnlUUmVpRjBGMW1vRHNTUkowVW1kNGxyVldNNmNJTE0rOHFpb0IzMGF6dXdQNnZDb3VsVkZwWS9vK0o0Wmc9PSIsIm1hcmtldHBsYWNlSWQiOiJBM0JYQjBZTjNYSDE3SCJ9'
+  )
+
+```
+
+Below is an example on how to enable Logging for the SDK:
+
+```ruby
+require 'amazon_pay'
+
+# Your Amazon Pay keys are
+# available in your Seller Central account
+merchant_id = 'YOUR_MERCHANT_ID'
+access_key = 'YOUR_ACCESS_KEY'
+secret_key = 'YOUR_SECRET_KEY'
+
+client = AmazonPay::Client.new(
+  merchant_id,
+  access_key,
+  secret_key,
+  log_enabled: true,
+  # If you don't specify a log file like
+  # the example below, logging will be
+  # output to the standard out stream
+  log_file_name: 'log.txt',
+  # Currently only the debug level has been
+  # implemented in the SDK. This is done
+  # by default.
+  log_level: :debug
+)
+
+```
+
 ### Response Parsing
 
 ```ruby
