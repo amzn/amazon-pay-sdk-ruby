@@ -68,6 +68,7 @@ module AmazonPay
     # the post url.
     def build_post_url
       @optional.map { |k, v| @parameters[k] = v unless v.nil? }
+      @parameters['Timestamp'] = Time.now.utc.iso8601 unless @parameters.has_key?('Timestamp')
       @parameters = @default_hash.merge(@parameters)
       post_url = @parameters.sort.map { |k, v| "#{k}=#{custom_escape(v)}" }.join('&')
       post_body = ['POST', @mws_endpoint.to_s, "/#{@sandbox_str}/#{AmazonPay::API_VERSION}", post_url].join("\n")

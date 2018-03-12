@@ -25,7 +25,6 @@ class AmazonPayUnitTest < Minitest::Test
     'AWSAccessKeyId' => ACCESS_KEY,
     'SignatureMethod' => 'HmacSHA256',
     'SignatureVersion' => '2',
-    'Timestamp' => Time.now.utc.iso8601,
     'Version' => AmazonPay::API_VERSION
   }
 

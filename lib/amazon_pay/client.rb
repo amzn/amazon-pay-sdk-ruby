@@ -92,7 +92,6 @@ module AmazonPay
         'AWSAccessKeyId' => @access_key,
         'SignatureMethod' => 'HmacSHA256',
         'SignatureVersion' => '2',
-        'Timestamp' => Time.now.utc.iso8601,
         'Version' => AmazonPay::API_VERSION
       }
 
