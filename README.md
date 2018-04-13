@@ -155,6 +155,28 @@ response = client.list_order_reference(
 
 ```
 
+Below is an example on how to GetMerchantAccountStatus 
+API call:
+
+```ruby
+require 'amazon_pay'
+
+# Your Amazon Pay keys are
+# available in your Seller Central account
+merchant_id = 'YOUR_MERCHANT_ID'
+access_key = 'YOUR_ACCESS_KEY'
+secret_key = 'YOUR_SECRET_KEY'
+
+client = AmazonPay::Client.new(
+  merchant_id,
+  access_key,
+  secret_key
+)
+
+response = client.client.get_merchant_account_status
+
+```
+
 Below is an example on how to query using the next token received
 from ListOrderReference using the ListOrderReferenceByNextToken 
 API call:

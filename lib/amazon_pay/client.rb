@@ -443,6 +443,26 @@ module AmazonPay
       operation(parameters, {})
     end
 
+    # Returns status of the merchant
+    # @optional merchant_id [String]
+    # @optional mws_auth_token [String]
+    def get_merchant_account_status(
+      merchant_id: @merchant_id,
+      mws_auth_token: nil
+    )
+
+      parameters = {
+        'Action' => 'GetMerchantAccountStatus',
+        'SellerId' => merchant_id
+      }
+
+      optional = {
+        'MWSAuthToken' => mws_auth_token
+      }
+      
+      operation(parameters, optional)
+    end
+
     # Returns details about the Order Reference object and its current state
     # @see https://pay.amazon.com/documentation/apireference/201751630#201751970
     # @param amazon_order_reference_id [String]

@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 class AmazonPayUnitTest < Minitest::Test
 
@@ -340,6 +340,24 @@ class AmazonPayUnitTest < Minitest::Test
     res = @client.list_order_reference_by_next_token(
       NEXT_PAGE_TOKEN
     )
+    assert_equal(true, res.success)
+  end
+
+  def test_get_merchant_account_status
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=GetMerchantAccountStatus"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.get_merchant_account_status
     assert_equal(true, res.success)
   end
 
