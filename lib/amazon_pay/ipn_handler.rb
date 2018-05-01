@@ -223,8 +223,10 @@ module AmazonPay
 
     def validate_subject(certificate_subject)
       subject = certificate_subject.to_a
+      domain = subject.select { |s| s[0] == "CN" }.first.try(:[], 1)
+
       unless
-        subject[4][1] == COMMON_NAME
+        domain == COMMON_NAME
       then
         msg = 'Error - Unable to verify certificate subject issued by Amazon'
         raise IpnWasNotAuthenticError, msg
