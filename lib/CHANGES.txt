@@ -1,0 +1,31 @@
+2.3.1 May 2018
+- Modify ipn_handler to work with new Cert format
+- Add CHANGES file
+
+2.3.0 April 2018
+- Add GetMerchantAccountStatus 
+
+2.2.1 March 2018
+- Create new Timestamp parameter on every request
+
+2.2.0 Jan 2018
+- Add ListOrderReference 
+- Add ListOrderReferenceByNextToken
+
+2.1.0 Jan 2018
+- Add Logging
+- Add SetOrderAttribute
+
+2.0.0 Feb 2017
+- Pay with Amazon to Amazon Pay rebranding
+
+1.x - 2015
+- Update README
+- Update documentation links
+- Change Login with Amazon API class and method name
+- Add one time transaction and subscriptions api flow
+- Add marketplace api support
+- Add client helper method
+- Add get user info api
+- Separate post request from client
+- Initial release
