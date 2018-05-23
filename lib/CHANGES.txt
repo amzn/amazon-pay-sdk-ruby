@@ -1,3 +1,7 @@
+2.3.2 May 2018
+- Modify get_order_reference_details and get_billing_agreement_details
+    to take access_token parameter 
+
 2.3.1 May 2018
 - Modify ipn_handler to work with new Cert format
 - Add CHANGES file

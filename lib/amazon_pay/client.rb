@@ -171,11 +171,13 @@ module AmazonPay
     # @see https://pay.amazon.com/documentation/apireference/201751630#201751690
     # @param amazon_billing_agreement_id [String]
     # @optional address_consent_token [String]
+    # @optional access_token [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_billing_agreement_details(
       amazon_billing_agreement_id,
       address_consent_token: nil,
+      access_token: nil,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -187,7 +189,9 @@ module AmazonPay
       }
 
       optional = {
-        'AddressConsentToken' => address_consent_token,
+        # Preseving address_consent_token for backwards compatibility
+        # AccessToken returns all data in AddressConsentToken plus new data
+        'AccessToken' => access_token || address_consent_token,
         'MWSAuthToken' => mws_auth_token
       }
 
@@ -467,11 +471,13 @@ module AmazonPay
     # @see https://pay.amazon.com/documentation/apireference/201751630#201751970
     # @param amazon_order_reference_id [String]
     # @optional address_consent_token [String]
+    # @optional access_token [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def get_order_reference_details(
       amazon_order_reference_id,
       address_consent_token: nil,
+      access_token: nil,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -483,7 +489,9 @@ module AmazonPay
       }
 
       optional = {
-        'AddressConsentToken' => address_consent_token,
+        # Preseving address_consent_token for backwards compatibility
+        # AccessToken returns all data in AddressConsentToken plus new data
+        'AccessToken' => access_token || address_consent_token,
         'MWSAuthToken' => mws_auth_token
       }
 
