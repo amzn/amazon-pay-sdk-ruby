@@ -193,6 +193,7 @@ class AmazonPayUnitTest < Minitest::Test
       "&OrderReferenceAttributes.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.1=Antiques"\
       "&OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
       "&OrderReferenceAttributes.SellerOrderAttributes.StoreName=store_name"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.SupplementaryData=%7B%22AirlineMetaData%22%20%3A%20%7B%22version%22%3A%201.0%7D%7D"\
       "&SellerId=#{MERCHANT_ID}"\
       "&SignatureMethod=HmacSHA256"\
       "&SignatureVersion=2"\
@@ -208,6 +209,7 @@ class AmazonPayUnitTest < Minitest::Test
     seller_order_id = 'seller_order_id'
     store_name = 'store_name'
     custom_information = 'custom_information'
+    supplementary_data = '{"AirlineMetaData" : {"version": 1.0}}'
     order_item_categories = ["Antiques"]
 
     res = @client.set_order_reference_details(
@@ -215,6 +217,7 @@ class AmazonPayUnitTest < Minitest::Test
       AMOUNT,
       store_name: store_name,
       custom_information: custom_information,
+      supplementary_data: supplementary_data,
       order_item_categories: order_item_categories,
       seller_note: seller_note,
       request_payment_authorization: false,
@@ -238,6 +241,7 @@ class AmazonPayUnitTest < Minitest::Test
       "&OrderAttributes.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.1=Antiques"\
       "&OrderAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
       "&OrderAttributes.SellerOrderAttributes.StoreName=store_name"\
+      "&OrderAttributes.SellerOrderAttributes.SupplementaryData=%7B%22AirlineMetaData%22%20%3A%20%7B%22version%22%3A%201.0%7D%7D"\
       "&SellerId=#{MERCHANT_ID}"\
       "&SignatureMethod=HmacSHA256"\
       "&SignatureVersion=2"\
@@ -253,6 +257,7 @@ class AmazonPayUnitTest < Minitest::Test
     seller_order_id = 'seller_order_id'
     store_name = 'store_name'
     custom_information = 'custom_information'
+    supplementary_data = '{"AirlineMetaData" : {"version": 1.0}}'
     order_item_categories = ["Antiques"]
     currency_code = 'USD'
     payment_service_provider_id = MERCHANT_ID
@@ -265,6 +270,7 @@ class AmazonPayUnitTest < Minitest::Test
       currency_code: currency_code,
       store_name: store_name,
       custom_information: custom_information,
+      supplementary_data: supplementary_data,
       order_item_categories: order_item_categories,
       platform_id: platform_id,
       payment_service_provider_id: payment_service_provider_id,

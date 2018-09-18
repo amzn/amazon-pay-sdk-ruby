@@ -26,7 +26,6 @@ module AmazonPay
     )
 
     attr_accessor(
-      :sandbox,
       :proxy_addr,
       :proxy_port,
       :proxy_user,
@@ -56,7 +55,7 @@ module AmazonPay
       merchant_id,
       access_key,
       secret_key,
-      sandbox: false,
+      sandbox:false,
       currency_code: :usd,
       region: :na,
       platform_id: nil,
@@ -67,7 +66,7 @@ module AmazonPay
       proxy_port: nil,
       proxy_user: nil,
       proxy_pass: nil,
-      log_enabled: false,
+      log_enabled:false,
       log_file_name: nil,
       log_level: :DEBUG
     )
@@ -463,7 +462,7 @@ module AmazonPay
       optional = {
         'MWSAuthToken' => mws_auth_token
       }
-      
+
       operation(parameters, optional)
     end
 
@@ -511,6 +510,7 @@ module AmazonPay
     # @optional store_name [String]
     # @optional order_item_categories Array[String]
     # @optional custom_information [String]
+    # @optional supplementary_data [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def set_order_reference_details(
@@ -524,6 +524,7 @@ module AmazonPay
       store_name: nil,
       order_item_categories: nil,
       custom_information: nil,
+      supplementary_data: nil,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -543,6 +544,7 @@ module AmazonPay
         'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => seller_order_id,
         'OrderReferenceAttributes.SellerOrderAttributes.StoreName' => store_name,
         'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
+        'OrderReferenceAttributes.SellerOrderAttributes.SupplementaryData' => supplementary_data,
         'MWSAuthToken' => mws_auth_token
       }
 
@@ -571,6 +573,7 @@ module AmazonPay
     # @optional store_name [String]
     # @optional order_item_categories Array[String]
     # @optional custom_information [String]
+    # @optional supplementary_data [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def set_order_attributes(
@@ -586,6 +589,7 @@ module AmazonPay
       store_name: nil,
       order_item_categories: nil,
       custom_information: nil,
+      supplementary_data: nil,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -607,6 +611,7 @@ module AmazonPay
         'OrderAttributes.RequestPaymentAuthorization' => request_payment_authorization,
         'OrderAttributes.SellerOrderAttributes.StoreName' => store_name,
         'OrderAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
+        'OrderAttributes.SellerOrderAttributes.SupplementaryData' => supplementary_data,
         'MWSAuthToken' => mws_auth_token
       }
 
@@ -1076,8 +1081,8 @@ module AmazonPay
       list = {}
 
       categories.each_with_index do |val, index|
-          list.merge!({"#{attribute_key}.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.#{index + 1}" => val})
-      end   
+        list.merge!("#{attribute_key}.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.#{index + 1}" => val)
+      end
 
       list
     end
