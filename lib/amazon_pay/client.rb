@@ -189,9 +189,7 @@ module AmazonPay
       }
 
       optional = {
-        # Preseving address_consent_token for backwards compatibility
-        # AccessToken returns all data in AddressConsentToken plus new data
-        'AccessToken' => access_token || address_consent_token,
+        'AddressConsentToken' => access_token || address_consent_token,
         'MWSAuthToken' => mws_auth_token
       }
 
