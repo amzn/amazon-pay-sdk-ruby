@@ -19,10 +19,12 @@ module AmazonPay
 
      def get_element(xpath, xml_element)
        xml = self.to_xml
+       value = nil
        xml.elements.each(xpath) do |element|
-         @value = element.elements[xml_element].text
+         value = element.elements[xml_element].text
        end
-       return @value
+
+       value
      end
 
      def code
@@ -31,9 +33,9 @@ module AmazonPay
 
      def success
       if @response.code.eql? '200'
-         return true
+        return true
       else
-         return false
+        return false
       end
      end
 
