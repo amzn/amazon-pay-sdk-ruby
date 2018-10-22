@@ -128,6 +128,7 @@ class AmazonPayUnitTest < Minitest::Test
     assert_equal("value", res.to_xml.root.elements[1].text)
     assert_equal("<root><test>value</test></root>", res.body)
     assert_equal("value", res.get_element("root","test"))
+    assert_not_equal(res.get_element("root","test"), res.get_element("extra","extra"))
     assert_equal("200", res.code)
   end
 
@@ -572,7 +573,8 @@ class AmazonPayUnitTest < Minitest::Test
 
   def test_get_refund_details
     post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
-      "&Action=GetRefundDetails&AmazonRefundId=amazon_refund_id"\
+      "&Action=GetRefundDetails"\
+      "&AmazonRefundId=amazon_refund_id"\
       "&SellerId=#{MERCHANT_ID}"\
       "&SignatureMethod=HmacSHA256"\
       "&SignatureVersion=2"\
@@ -589,8 +591,9 @@ class AmazonPayUnitTest < Minitest::Test
 
   def test_get_billing_agreement_details
     post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
-      "&AccessToken=address_consent_token"\
-      "&Action=GetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&Action=GetBillingAgreementDetails"\
+      "&AddressConsentToken=address_consent_token"\
+      "&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
       "&SellerId=#{MERCHANT_ID}"\
       "&SignatureMethod=HmacSHA256"\
       "&SignatureVersion=2"\
@@ -603,6 +606,21 @@ class AmazonPayUnitTest < Minitest::Test
 
     res = @client.get_billing_agreement_details(AMAZON_BILLING_AGREEMENT_ID, address_consent_token: "address_consent_token")
     assert_equal(true, res.success)
+
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&AccessToken=address_consent_token"\
+      "&Action=GetBillingAgreementDetails"\
+      "&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+    
     res = @client.get_billing_agreement_details(AMAZON_BILLING_AGREEMENT_ID, access_token: "address_consent_token")
     assert_equal(true, res.success)
   end

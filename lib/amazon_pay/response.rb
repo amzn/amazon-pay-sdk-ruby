@@ -19,10 +19,11 @@ module AmazonPay
 
      def get_element(xpath, xml_element)
        xml = self.to_xml
+       value = nil
        xml.elements.each(xpath) do |element|
-         @value = element.elements[xml_element].text
+         value = element.elements[xml_element].text
        end
-       return @value
+       return value
      end
 
      def code

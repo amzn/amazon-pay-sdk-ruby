@@ -1,3 +1,8 @@
+2.3.4 Oct 2018
+- Bug Fix get_billing_agreement_details to take 
+    take addreess_consent_token
+- Bug Fix get_element invalid response
+
 2.3.3 Sept 2018
 - Modify set_order_attribute and set_order_reference_details to take 
     supplementary_data value

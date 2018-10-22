@@ -173,6 +173,7 @@ module AmazonPay
     # @optional access_token [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
+    
     def get_billing_agreement_details(
       amazon_billing_agreement_id,
       address_consent_token: nil,
@@ -190,7 +191,10 @@ module AmazonPay
       optional = {
         # Preseving address_consent_token for backwards compatibility
         # AccessToken returns all data in AddressConsentToken plus new data
-        'AccessToken' => access_token || address_consent_token,
+        # You cannot pass both address_consent_token and access_token in
+        # the same call or you will encounter a 400/"AmbiguousToken" error
+        'AccessToken' => access_token,
+        'AddressConsentToken' => address_consent_token,
         'MWSAuthToken' => mws_auth_token
       }
 
