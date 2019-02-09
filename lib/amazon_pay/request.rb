@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/MethodLength, Metrics/LineLength, Metrics/ParameterLists, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+
 require 'uri'
 require 'net/http'
 require 'net/https'
@@ -46,13 +48,7 @@ module AmazonPay
       @application_name = application_name
       @application_version = application_version
 
-      if @log_enabled
-        log_set = AmazonPay::LogInitializer.new(
-          log_file_name,
-          log_level
-        )
-        @logger = log_set.create_logger
-      end
+      @logger = AmazonPay::LogInitializer.new(log_file_name, log_level).create_logger if @log_enabled
     end
 
     # This method sends the post request.
@@ -68,7 +64,7 @@ module AmazonPay
     # the post url.
     def build_post_url
       @optional.map { |k, v| @parameters[k] = v unless v.nil? }
-      @parameters['Timestamp'] = Time.now.utc.iso8601 unless @parameters.has_key?('Timestamp')
+      @parameters['Timestamp'] = Time.now.utc.iso8601 unless @parameters.key?('Timestamp')
       @parameters = @default_hash.merge(@parameters)
       post_url = @parameters.sort.map { |k, v| "#{k}=#{custom_escape(v)}" }.join('&')
       post_body = ['POST', @mws_endpoint.to_s, "/#{@sandbox_str}/#{AmazonPay::API_VERSION}", post_url].join("\n")
@@ -106,11 +102,8 @@ module AmazonPay
           @logger.debug("response: #{data.sanitize_response_data}")
         end
         if @throttle.eql?(true)
-          if response.code.eql?('500')
-            raise 'InternalServerError'
-          elsif response.code.eql?('503')
-            raise 'ServiceUnavailable or RequestThrottled'
-          end
+          raise 'InternalServerError' if response.code.eql?('500')
+          raise 'ServiceUnavailable or RequestThrottled' if response.code.eql?('503')
         end
         AmazonPay::Response.new(response)
       rescue StandardError => error

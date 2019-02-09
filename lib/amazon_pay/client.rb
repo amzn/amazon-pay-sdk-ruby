@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/MethodLength, Metrics/LineLength, Metrics/AbcSize, Metrics/ClassLength, Metrics/ParameterLists, Style/AccessorMethodName
+
 require 'time'
 require 'logger'
 require 'stringio'
@@ -55,7 +57,7 @@ module AmazonPay
       merchant_id,
       access_key,
       secret_key,
-      sandbox:false,
+      sandbox: false,
       currency_code: :usd,
       region: :na,
       platform_id: nil,
@@ -66,7 +68,7 @@ module AmazonPay
       proxy_port: nil,
       proxy_user: nil,
       proxy_pass: nil,
-      log_enabled:false,
+      log_enabled: false,
       log_file_name: nil,
       log_level: :DEBUG
     )
@@ -125,6 +127,7 @@ module AmazonPay
     # @optional seller_order_id [String]
     # @optional store_name [String]
     # @optional custom_information [String]
+    # @optional supplementary_data [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def create_order_reference_for_id(
@@ -139,6 +142,7 @@ module AmazonPay
       seller_order_id: nil,
       store_name: nil,
       custom_information: nil,
+      supplementary_data: nil,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -160,6 +164,7 @@ module AmazonPay
         'OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId' => seller_order_id,
         'OrderReferenceAttributes.SellerOrderAttributes.StoreName' => store_name,
         'OrderReferenceAttributes.SellerOrderAttributes.CustomInformation' => custom_information,
+        'OrderReferenceAttributes.SellerOrderAttributes.SupplementaryData' => supplementary_data,
         'MWSAuthToken' => mws_auth_token
       }
 
@@ -173,7 +178,7 @@ module AmazonPay
     # @optional access_token [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
-    
+
     def get_billing_agreement_details(
       amazon_billing_agreement_id,
       address_consent_token: nil,
@@ -308,6 +313,7 @@ module AmazonPay
     # @optional seller_order_id [String]
     # @optional store_name [String]
     # @optional inherit_shipping_address [Boolean]
+    # @optional supplementary_data [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def authorize_on_billing_agreement(
@@ -325,6 +331,7 @@ module AmazonPay
       seller_order_id: nil,
       store_name: nil,
       inherit_shipping_address: nil,
+      supplementary_data: nil,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -348,6 +355,7 @@ module AmazonPay
         'SellerOrderAttributes.CustomInformation' => custom_information,
         'SellerOrderAttributes.SellerOrderId' => seller_order_id,
         'SellerOrderAttributes.StoreName' => store_name,
+        'SellerOrderAttributes.SupplementaryData' => supplementary_data,
         'InheritShippingAddress' => inherit_shipping_address,
         'MWSAuthToken' => mws_auth_token
       }
@@ -583,7 +591,7 @@ module AmazonPay
     def set_order_attributes(
       amazon_order_reference_id,
       amount: nil,
-      currency_code: nil,
+      currency_code: @currency_code,
       platform_id: nil,
       seller_note: nil,
       seller_order_id: nil,
@@ -619,6 +627,8 @@ module AmazonPay
         'MWSAuthToken' => mws_auth_token
       }
 
+      optional['OrderAttributes.OrderTotal.CurrencyCode'] = nil if amount.nil?
+
       if order_item_categories
         optional.merge!(
           get_categories_list(
@@ -635,10 +645,18 @@ module AmazonPay
     # information has been set on the order reference
     # @see https://pay.amazon.com/documentation/apireference/201751630#201751980
     # @param amazon_order_reference_id [String]
+    # @optional success_url [String]
+    # @optional failure_url [String]
+    # @optional authorization_amount [String]
+    # @optional currency_code [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
     def confirm_order_reference(
       amazon_order_reference_id,
+      success_url: nil,
+      failure_url: nil,
+      authorization_amount: nil,
+      currency_code: @currency_code,
       merchant_id: @merchant_id,
       mws_auth_token: nil
     )
@@ -650,8 +668,14 @@ module AmazonPay
       }
 
       optional = {
+        'SuccessUrl' => success_url,
+        'FailureUrl' => failure_url,
+        'AuthorizationAmount.Amount' => authorization_amount,
+        'AuthorizationAmount.CurrencyCode' => currency_code,
         'MWSAuthToken' => mws_auth_token
       }
+
+      optional['AuthorizationAmount.CurrencyCode'] = nil if authorization_amount.nil?
 
       operation(parameters, optional)
     end

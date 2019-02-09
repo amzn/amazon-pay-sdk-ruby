@@ -1,6 +1,9 @@
+# rubocop:disable all
+
 require 'test_helper'
 
 class AmazonPayUnitTest < Minitest::Test
+# If using Ruby 2.1: class AmazonPayUnitTest < MiniTest::Unit::TestCase
 
   MERCHANT_ID = 'MERCHANT_ID'
   ACCESS_KEY = 'ACCESS_KEY'
@@ -21,6 +24,11 @@ class AmazonPayUnitTest < Minitest::Test
   END_TIME_ENCODED = '2017-05-27T03%3A23%3A21.923Z'
   QUERY_ID = '1234-example-order'
   QUERY_ID_TYPE = 'SellerOrderId'
+  SUCCESS_URL = 'https://pay.amazon.com/success.html'
+  FAILURE_URL = 'https://pay.amazon.com/failure.html'
+  SUCCESS_URL_ENCODED = 'https%3A%2F%2Fpay.amazon.com%2Fsuccess.html'
+  FAILURE_URL_ENCODED = 'https%3A%2F%2Fpay.amazon.com%2Ffailure.html'
+
   DEFAULT_HASH = {
     'AWSAccessKeyId' => ACCESS_KEY,
     'SignatureMethod' => 'HmacSHA256',
@@ -227,7 +235,114 @@ class AmazonPayUnitTest < Minitest::Test
     assert_equal(true, res.success)
   end
 
-  def test_set_order_attributes
+  def test_set_order_attributes_without_amount
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetOrderAttributes"\
+      "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderId=#{MERCHANT_ID}"\
+      "&OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderOrderId=psp_order_id"\
+      "&OrderAttributes.PlatformId=#{MERCHANT_ID}"\
+      "&OrderAttributes.RequestPaymentAuthorization=false"\
+      "&OrderAttributes.SellerNote=seller_note"\
+      "&OrderAttributes.SellerOrderAttributes.CustomInformation=custom_information"\
+      "&OrderAttributes.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.1=Antiques"\
+      "&OrderAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
+      "&OrderAttributes.SellerOrderAttributes.StoreName=store_name"\
+      "&OrderAttributes.SellerOrderAttributes.SupplementaryData=%7B%22AirlineMetaData%22%20%3A%20%7B%22version%22%3A%201.0%7D%7D"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    seller_note = 'seller_note'
+    seller_order_id = 'seller_order_id'
+    store_name = 'store_name'
+    custom_information = 'custom_information'
+    supplementary_data = '{"AirlineMetaData" : {"version": 1.0}}'
+    order_item_categories = ["Antiques"]
+    payment_service_provider_id = MERCHANT_ID
+    payment_service_provider_order_id = 'psp_order_id'
+    platform_id = MERCHANT_ID
+
+    res = @client.set_order_attributes(
+      AMAZON_ORDER_REFERENCE_ID,
+      store_name: store_name,
+      custom_information: custom_information,
+      supplementary_data: supplementary_data,
+      order_item_categories: order_item_categories,
+      platform_id: platform_id,
+      payment_service_provider_id: payment_service_provider_id,
+      payment_service_provider_order_id: payment_service_provider_order_id,
+      seller_note: seller_note,
+      request_payment_authorization: false,
+      seller_order_id: seller_order_id
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_set_order_attributes_using_amount_with_overridden_currency
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetOrderAttributes"\
+      "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&OrderAttributes.OrderTotal.Amount=#{AMOUNT}"\
+      "&OrderAttributes.OrderTotal.CurrencyCode=EUR"\
+      "&OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderId=#{MERCHANT_ID}"\
+      "&OrderAttributes.PaymentServiceProviderAttributes.PaymentServiceProviderOrderId=psp_order_id"\
+      "&OrderAttributes.PlatformId=#{MERCHANT_ID}"\
+      "&OrderAttributes.RequestPaymentAuthorization=false"\
+      "&OrderAttributes.SellerNote=seller_note"\
+      "&OrderAttributes.SellerOrderAttributes.CustomInformation=custom_information"\
+      "&OrderAttributes.SellerOrderAttributes.OrderItemCategories.OrderItemCategory.1=Antiques"\
+      "&OrderAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
+      "&OrderAttributes.SellerOrderAttributes.StoreName=store_name"\
+      "&OrderAttributes.SellerOrderAttributes.SupplementaryData=%7B%22AirlineMetaData%22%20%3A%20%7B%22version%22%3A%201.0%7D%7D"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
+      "&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    seller_note = 'seller_note'
+    seller_order_id = 'seller_order_id'
+    store_name = 'store_name'
+    custom_information = 'custom_information'
+    supplementary_data = '{"AirlineMetaData" : {"version": 1.0}}'
+    order_item_categories = ["Antiques"]
+    currency_code = 'EUR'
+    payment_service_provider_id = MERCHANT_ID
+    payment_service_provider_order_id = 'psp_order_id'
+    platform_id = MERCHANT_ID
+
+    res = @client.set_order_attributes(
+      AMAZON_ORDER_REFERENCE_ID,
+      amount: AMOUNT,
+      currency_code: currency_code,
+      store_name: store_name,
+      custom_information: custom_information,
+      supplementary_data: supplementary_data,
+      order_item_categories: order_item_categories,
+      platform_id: platform_id,
+      payment_service_provider_id: payment_service_provider_id,
+      payment_service_provider_order_id: payment_service_provider_order_id,
+      seller_note: seller_note,
+      request_payment_authorization: false,
+      seller_order_id: seller_order_id
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_set_order_attributes_using_amount_with_default_currency
     post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
       "&Action=SetOrderAttributes"\
       "&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
@@ -260,7 +375,6 @@ class AmazonPayUnitTest < Minitest::Test
     custom_information = 'custom_information'
     supplementary_data = '{"AirlineMetaData" : {"version": 1.0}}'
     order_item_categories = ["Antiques"]
-    currency_code = 'USD'
     payment_service_provider_id = MERCHANT_ID
     payment_service_provider_order_id = 'psp_order_id'
     platform_id = MERCHANT_ID
@@ -268,7 +382,6 @@ class AmazonPayUnitTest < Minitest::Test
     res = @client.set_order_attributes(
       AMAZON_ORDER_REFERENCE_ID,
       amount: AMOUNT,
-      currency_code: currency_code,
       store_name: store_name,
       custom_information: custom_information,
       supplementary_data: supplementary_data,
@@ -296,6 +409,79 @@ class AmazonPayUnitTest < Minitest::Test
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.confirm_order_reference(AMAZON_ORDER_REFERENCE_ID)
+    assert_equal(true, res.success)
+  end
+
+  def test_confirm_order_reference_using_sca_with_amount_default_currency
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&AuthorizationAmount.Amount=#{AMOUNT}"\
+      "&AuthorizationAmount.CurrencyCode=USD"\
+      "&FailureUrl=#{FAILURE_URL_ENCODED}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&SuccessUrl=#{SUCCESS_URL_ENCODED}"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.confirm_order_reference(
+      AMAZON_ORDER_REFERENCE_ID,
+      authorization_amount: AMOUNT,
+      success_url: SUCCESS_URL,
+      failure_url: FAILURE_URL
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_confirm_order_reference_using_sca_with_amount_overriden_currency
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&AuthorizationAmount.Amount=#{AMOUNT}"\
+      "&AuthorizationAmount.CurrencyCode=EUR"\
+      "&FailureUrl=#{FAILURE_URL_ENCODED}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&SuccessUrl=#{SUCCESS_URL_ENCODED}"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.confirm_order_reference(
+      AMAZON_ORDER_REFERENCE_ID,
+      authorization_amount: AMOUNT,
+      currency_code: 'EUR',
+      success_url: SUCCESS_URL,
+      failure_url: FAILURE_URL
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_confirm_order_reference_using_sca_without_amount
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&FailureUrl=#{FAILURE_URL_ENCODED}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&SuccessUrl=#{SUCCESS_URL_ENCODED}"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.confirm_order_reference(
+      AMAZON_ORDER_REFERENCE_ID,
+      success_url: SUCCESS_URL,
+      failure_url: FAILURE_URL
+    )
     assert_equal(true, res.success)
   end
 
@@ -699,6 +885,7 @@ class AmazonPayUnitTest < Minitest::Test
       "&AuthorizationReferenceId=#{AUTHORIZATION_REFERENCE_ID}"\
       "&CaptureNow=capture_now"\
       "&SellerId=#{MERCHANT_ID}"\
+      "&SellerOrderAttributes.SupplementaryData=%7B%22AirlineMetaData%22%20%3A%20%7B%22version%22%3A%201.0%7D%7D"\
       "&SignatureMethod=HmacSHA256"\
       "&SignatureVersion=2"\
       "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}"\
@@ -714,7 +901,8 @@ class AmazonPayUnitTest < Minitest::Test
       AUTHORIZATION_REFERENCE_ID, 
       AMOUNT, 
       capture_now: "capture_now", 
-      transaction_timeout: "transaction_timeout"
+      transaction_timeout: "transaction_timeout",
+      supplementary_data: '{"AirlineMetaData" : {"version": 1.0}}'
     )
     assert_equal(true, res.success)
   end
@@ -729,6 +917,7 @@ class AmazonPayUnitTest < Minitest::Test
       "&OrderReferenceAttributes.OrderTotal.CurrencyCode=USD"\
       "&OrderReferenceAttributes.SellerNote=seller_note"\
       "&OrderReferenceAttributes.SellerOrderAttributes.SellerOrderId=seller_order_id"\
+      "&OrderReferenceAttributes.SellerOrderAttributes.SupplementaryData=%7B%22AirlineMetaData%22%20%3A%20%7B%22version%22%3A%201.0%7D%7D"\
       "&SellerId=#{MERCHANT_ID}"\
       "&SignatureMethod=HmacSHA256"\
       "&SignatureVersion=2"\
@@ -745,7 +934,8 @@ class AmazonPayUnitTest < Minitest::Test
       confirm_now: "confirm_now", 
       amount: AMOUNT, 
       seller_note: "seller_note", 
-      seller_order_id: "seller_order_id"
+      seller_order_id: "seller_order_id",
+      supplementary_data: '{"AirlineMetaData" : {"version": 1.0}}'
     )
     assert_equal(true, res.success)
   end
@@ -903,9 +1093,14 @@ class AmazonPayUnitTest < Minitest::Test
   end
 
   def test_sanitize_response_data
-    unsanitized_file = File.read("./test/unsanitized_log.txt")
-    sanitized_file = File.read("./test/sanitized_log.txt")
-    
+    begin
+      unsanitized_file = File.read("./test/unsanitized_log.txt")
+      sanitized_file = File.read("./test/sanitized_log.txt")
+    rescue 
+      unsanitized_file = File.read("./lib/test/unsanitized_log.txt")
+      sanitized_file = File.read("./lib/test/sanitized_log.txt")
+    end
+
     data = AmazonPay::Sanitize.new(unsanitized_file)
     assert_equal(sanitized_file, data.sanitize_response_data)
   end

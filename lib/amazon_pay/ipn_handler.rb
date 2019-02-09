@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/MethodLength, Metrics/ClassLength, Metrics/LineLength, Metrics/ParameterLists, Metrics/AbcSize, Metrics/CyclomaticComplexity, Rails/Blank
+
 require 'base64'
 require 'json'
 require 'net/http'
@@ -18,6 +20,10 @@ module AmazonPay
   # there are many helper methods in place to extract information received
   # from the ipn notification.
   class IpnHandler
+    MSG_HEADER = 'Error - Header does not contain x-amz-sns-message-type header'.freeze
+    MSG_CERTIFICATE = 'Error - Unable to verify certificate subject issued by Amazon'.freeze
+    MSG_KEY = 'Error - Unable to verify public key with signature and signed string'.freeze
+
     SIGNABLE_KEYS = %w[
       Message
       MessageId
@@ -66,13 +72,7 @@ module AmazonPay
       @proxy_pass = proxy_pass
 
       @log_enabled = log_enabled
-      if @log_enabled
-        log_set = AmazonPay::LogInitializer.new(
-          log_file_name,
-          log_level
-        )
-        @logger = log_set.create_logger
-      end
+      @logger = AmazonPay::LogInitializer.new(log_file_name, log_level).create_logger if @log_enabled
     end
 
     # This method will authenticate the ipn message sent from Amazon.
@@ -81,8 +81,8 @@ module AmazonPay
     def authentic?
       decoded_from_base64 = Base64.decode64(signature)
       validate_header
-      validate_subject(get_certificate.subject)
-      public_key = get_public_key_from(get_certificate)
+      validate_subject(certificate.subject)
+      public_key = public_key_from(certificate)
       verify_public_key(public_key, decoded_from_base64, canonical_string)
 
       return true
@@ -156,12 +156,12 @@ module AmazonPay
 
     protected
 
-    def get_certificate
+    def certificate
       cert_pem = download_cert(signing_cert_url)
       OpenSSL::X509::Certificate.new(cert_pem)
     end
 
-    def get_public_key_from(certificate)
+    def public_key_from(certificate)
       OpenSSL::PKey::RSA.new(certificate.public_key)
     end
 
@@ -178,11 +178,9 @@ module AmazonPay
 
     def download_cert(url)
       uri = URI.parse(url)
-      unless
-        uri.scheme == 'https' &&
-        uri.host.match(/^sns\.[a-zA-Z0-9\-]{3,}\.amazonaws\.com(\.cn)?$/) &&
-        File.extname(uri.path) == '.pem'
-      then
+      unless uri.scheme == 'https' &&
+             uri.host.match(/^sns\.[a-zA-Z0-9\-]{3,}\.amazonaws\.com(\.cn)?$/) &&
+             File.extname(uri.path) == '.pem'
         msg = "Error - certificate is not hosted at AWS URL (https): #{url}"
         raise IpnWasNotAuthenticError, msg
       end
@@ -191,7 +189,7 @@ module AmazonPay
         resp = https_get(url)
         if @log_enabled
           data = AmazonPay::Sanitize.new(resp.body)
-          @logger.debug(data.sanitize_response_data)          
+          @logger.debug(data.sanitize_response_data)
         end
         resp.body
       rescue StandardError => error
@@ -213,31 +211,16 @@ module AmazonPay
     end
 
     def validate_header
-      unless
-        @headers['x-amz-sns-message-type'] == 'Notification'
-      then
-        msg = 'Error - Header does not contain x-amz-sns-message-type header'
-        raise IpnWasNotAuthenticError, msg
-      end
+      raise IpnWasNotAuthenticError, MSG_HEADER unless @headers['x-amz-sns-message-type'] == 'Notification'
     end
 
     def validate_subject(certificate_subject)
       subject = certificate_subject.to_a
-      unless 
-        subject.rassoc(COMMON_NAME)
-      then
-        msg = 'Error - Unable to verify certificate subject issued by Amazon'
-        raise IpnWasNotAuthenticError, msg
-      end
+      raise IpnWasNotAuthenticError, MSG_CERTIFICATE unless subject.rassoc(COMMON_NAME)
     end
 
     def verify_public_key(public_key, decoded_signature, signed_string)
-      unless
-        public_key.verify(OpenSSL::Digest::SHA1.new, decoded_signature, signed_string)
-      then
-        msg = 'Error - Unable to verify public key with signature and signed string'
-        raise IpnWasNotAuthenticError, msg
-      end
+      raise IpnWasNotAuthenticError, MSG_KEY unless public_key.verify(OpenSSL::Digest::SHA1.new, decoded_signature, signed_string)
     end
   end
 end

@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/MethodLength
+
 require 'logger'
 require 'stringio'
 

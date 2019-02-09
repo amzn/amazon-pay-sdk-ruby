@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/MethodLength, Metrics/LineLength, Metrics/ClassLength, Metrics/ParameterLists
+
 module AmazonPay
   # This will extend the client class to add additional
   # helper methods that combine core API calls.
@@ -31,8 +33,8 @@ module AmazonPay
       mws_auth_token: nil
     )
 
-      if is_order_reference?(amazon_reference_id)
-        response = call_order_reference_api(
+      if order_reference?(amazon_reference_id)
+        call_order_reference_api(
           amazon_reference_id,
           authorization_reference_id,
           charge_amount,
@@ -46,11 +48,8 @@ module AmazonPay
           merchant_id,
           mws_auth_token
         )
-        return response
-      end
-
-      if is_billing_agreement?(amazon_reference_id)
-        response = call_billing_agreement_api(
+      elsif billing_agreement?(amazon_reference_id)
+        call_billing_agreement_api(
           amazon_reference_id,
           authorization_reference_id,
           charge_amount,
@@ -64,7 +63,6 @@ module AmazonPay
           merchant_id,
           mws_auth_token
         )
-        return response
       end
     end
 
@@ -94,10 +92,11 @@ module AmazonPay
       mws_auth_token: nil
     )
 
-      set_order_attributes(amazon_order_reference_id,
+      set_order_attributes(
         # amount:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
         # currency_code:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
         # platform_id:(This value can't be modified after order is confirmed so it isn't passed to set_order_attributes)
+        amazon_order_reference_id,
         seller_note: seller_note,
         seller_order_id: seller_order_id,
         payment_service_provider_id: payment_service_provider_id,
@@ -161,7 +160,7 @@ module AmazonPay
           )
         end
       end
-      return response
+      response
     end
 
     def call_billing_agreement_api(
@@ -223,14 +222,14 @@ module AmazonPay
         merchant_id: merchant_id,
         mws_auth_token: mws_auth_token
       )
-      return response
+      response
     end
 
-    def is_order_reference?(amazon_reference_id)
+    def order_reference?(amazon_reference_id)
       amazon_reference_id.start_with?('S', 'P')
     end
 
-    def is_billing_agreement?(amazon_reference_id)
+    def billing_agreement?(amazon_reference_id)
       amazon_reference_id.start_with?('C', 'B')
     end
   end

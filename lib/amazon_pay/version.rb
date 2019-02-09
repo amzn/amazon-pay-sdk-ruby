@@ -1,5 +1,5 @@
 module AmazonPay
-  VERSION = "2.3.4"
-  SDK_NAME = "amazon-pay-sdk-ruby"
-  API_VERSION = "2013-01-01"
+  VERSION = '2.4.0'.freeze
+  SDK_NAME = 'amazon-pay-sdk-ruby'.freeze
+  API_VERSION = '2013-01-01'.freeze
 end

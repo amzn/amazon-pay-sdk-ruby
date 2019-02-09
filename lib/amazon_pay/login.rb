@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/MethodLength, Metrics/LineLength, Metrics/AbcSize
+
 require 'uri'
 require 'net/http'
 require 'net/https'
@@ -5,14 +7,12 @@ require 'json'
 require 'openssl'
 
 module AmazonPay
-
   # AmazonPay API
   #
   # This class allows you to obtain user profile
   # information once a user has logged into your
   # application using their Amazon credentials.
   class Login
-
     attr_reader(:region)
 
     attr_accessor(:client_id, :sandbox)
@@ -25,7 +25,7 @@ module AmazonPay
       @region = region
       @endpoint = region_hash[@region]
       @sandbox = sandbox
-      @sandbox_str = @sandbox ? "api.sandbox" : "api"
+      @sandbox_str = @sandbox ? 'api.sandbox' : 'api'
     end
 
     # This method will validate the access token and
@@ -42,34 +42,30 @@ module AmazonPay
       response = http.request(req)
       decode = JSON.parse(response.body)
 
-      if decode['aud'] != @client_id
-        raise "Invalid Access Token"
-      end
+      raise 'Invalid Access Token' if decode['aud'] != @client_id
 
       uri = URI.parse("https://#{@sandbox_str}.#{@endpoint}/user/profile")
       req = Net::HTTP::Get.new(uri.request_uri)
-      req['Authorization'] = "bearer " + decoded_access_token
+      req['Authorization'] = 'bearer ' + decoded_access_token
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
       response = http.request(req)
       decoded_login_profile = JSON.parse(response.body)
-      return decoded_login_profile
+      decoded_login_profile
     end
 
     private
 
     def region_hash
       {
-        :jp => 'amazon.co.jp',
-        :uk => 'amazon.co.uk',
-        :de => 'amazon.de',
-        :eu => 'amazon.co.uk',
-        :us => 'amazon.com',
-        :na => 'amazon.com'
+        jp: 'amazon.co.jp',
+        uk: 'amazon.co.uk',
+        de: 'amazon.de',
+        eu: 'amazon.co.uk',
+        us: 'amazon.com',
+        na: 'amazon.com'
       }
     end
-
   end
-
 end

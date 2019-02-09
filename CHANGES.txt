@@ -1,0 +1,52 @@
+Version 2.4.0 - February 2019
+- confirm_order_reference API has four new request parameters:
+  success_url, failure_url, authorization_amount, and authorization_currency_code
+  For usage instructions, please consult the
+  Amazon Pay Strong Customer Authentication (SCA) Upgrade Integration Guide
+- Support for supplementary_data attribute added to
+  authorize_on_billing_agreement and create_order_reference_for_id
+
+Version 2.3.4 - October 2018
+- Bug Fix get_billing_agreement_details to take 
+    take addreess_consent_token
+- Bug Fix get_element invalid response
+
+Version 2.3.3 - Sept 2018
+- Modify set_order_attribute and set_order_reference_details to take 
+    supplementary_data value
+    
+Version 2.3.2 - May 2018
+- Modify get_order_reference_details and get_billing_agreement_details
+    to take access_token parameter 
+
+Version 2.3.1 - May 2018
+- Modify ipn_handler to work with new Cert format
+- Add CHANGES.txt file
+
+Version 2.3.0 - April 2018
+- Add get_merchant_account_status
+
+Version 2.2.1 - March 2018
+- Create new Timestamp parameter on every request
+
+Version 2.2.0 - January 2018
+- Add list_order_reference
+- Add list_order_reference_by_next_token
+
+Version 2.1.0 - January 2018
+- Add logging
+- Add set_order_attribute
+
+Version 2.0.0 - February 2017
+- Pay with Amazon to Amazon Pay rebranding
+
+Version 1.x - 2015
+- Update README
+- Update documentation links
+- Change Login with Amazon API class and method name
+- Add one time transaction and subscriptions api flow
+- Add marketplace api support
+- Add client helper method
+- Add get user info api
+- Separate post request from client
+- Initial release
