@@ -173,7 +173,7 @@ client = AmazonPay::Client.new(
   secret_key
 )
 
-response = client.client.get_merchant_account_status
+response = client.get_merchant_account_status
 
 ```
 
