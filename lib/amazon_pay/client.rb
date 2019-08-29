@@ -217,6 +217,10 @@ module AmazonPay
     # @optional store_name [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
+    # @optional billing_agreement_type [String] - one of CustomerInitiatedTransaction or MerchantInitiatedTransaction
+    # @optional subscription_amount [String]
+    # @optional subscription_currency_code [String]
+
     def set_billing_agreement_details(
       amazon_billing_agreement_id,
       platform_id: nil,
@@ -225,6 +229,9 @@ module AmazonPay
       custom_information: nil,
       store_name: nil,
       merchant_id: @merchant_id,
+      billing_agreement_type: nil,
+      subscription_amount: nil,
+      subscription_currency_code: @currency_code,
       mws_auth_token: nil
     )
 
@@ -240,8 +247,13 @@ module AmazonPay
         'BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId' => seller_billing_agreement_id,
         'BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation' => custom_information,
         'BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName' => store_name,
+        'BillingAgreementAttributes.BillingAgreementType' => billing_agreement_type,
+        'BillingAgreementAttributes.SubscriptionAmount.Amount' => subscription_amount,
+        'BillingAgreementAttributes.SubscriptionAmount.CurrencyCode' => subscription_currency_code,
         'MWSAuthToken' => mws_auth_token
       }
+
+      optional['BillingAgreementAttributes.SubscriptionAmount.CurrencyCode'] = nil if subscription_amount.nil?
 
       operation(parameters, optional)
     end
@@ -252,9 +264,13 @@ module AmazonPay
     # @param amazon_billing_agreement_id [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
+    # @optional success_url [String]
+    # @optional failure_url [String]
     def confirm_billing_agreement(
       amazon_billing_agreement_id,
       merchant_id: @merchant_id,
+      success_url: nil,
+      failure_url: nil,
       mws_auth_token: nil
     )
 
@@ -265,6 +281,8 @@ module AmazonPay
       }
 
       optional = {
+        'SuccessUrl' => success_url,
+        'FailureUrl' => failure_url,
         'MWSAuthToken' => mws_auth_token
       }
 

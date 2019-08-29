@@ -1,8 +1,18 @@
+Version 2.5.0 - August 2019
+- (EU/UK) confirm_billing_agreement API has two new optional request parameters:
+  success_url, failure_url
+- (EU/UK) set_billing_agreement_details API has three new optional request parameter:
+  billing_agreement_type, subscription_amount, subscription_currency_code
+- (EU/UK)For usage instructions, please consult the automatic payments
+  Amazon Pay Strong Customer Authentication (SCA) Upgrade Integration Guide
+  https://developer.amazon.com/docs/eu/amazon-pay-automatic/sca-upgrade.html
+
 Version 2.4.0 - February 2019
-- confirm_order_reference API has four new request parameters:
+- (EU/UK) confirm_order_reference API has four new request parameters:
   success_url, failure_url, authorization_amount, and authorization_currency_code
   For usage instructions, please consult the
   Amazon Pay Strong Customer Authentication (SCA) Upgrade Integration Guide
+  https://developer.amazon.com/docs/eu/amazon-pay-onetime/sca-upgrade.html
 - Support for supplementary_data attribute added to
   authorize_on_billing_agreement and create_order_reference_for_id
 

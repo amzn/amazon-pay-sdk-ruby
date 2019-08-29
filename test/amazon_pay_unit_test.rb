@@ -842,6 +842,121 @@ class AmazonPayUnitTest < Minitest::Test
     assert_equal(true, res.success)
   end
 
+  def test_set_billing_agreement_details_sca_with_amount_overriden_currency
+    seller_note = 'seller_note'
+    store_name = 'store_name'
+    custom_information = 'custom_information'
+    seller_billing_agreement_id = 'seller_billing_agreement_id'
+    billing_agreement_type = 'MerchantInitiatedTransaction'
+    subscription_amount = '1.23'
+    subscription_currency_code = 'GBP'
+
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&BillingAgreementAttributes.BillingAgreementType=#{billing_agreement_type}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation=#{custom_information}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId=#{seller_billing_agreement_id}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName=#{store_name}"\
+      "&BillingAgreementAttributes.SellerNote=seller_note"\
+      "&BillingAgreementAttributes.SubscriptionAmount.Amount=#{subscription_amount}"\
+      "&BillingAgreementAttributes.SubscriptionAmount.CurrencyCode=#{subscription_currency_code}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.set_billing_agreement_details(
+      AMAZON_BILLING_AGREEMENT_ID,
+      store_name: store_name,
+      seller_billing_agreement_id: seller_billing_agreement_id,
+      custom_information: custom_information,
+      seller_note: seller_note,
+      billing_agreement_type: billing_agreement_type,
+      subscription_amount: subscription_amount,
+      subscription_currency_code: subscription_currency_code
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_set_billing_agreement_details_sca_with_amount_default_currency
+    seller_note = 'seller_note'
+    store_name = 'store_name'
+    custom_information = 'custom_information'
+    seller_billing_agreement_id = 'seller_billing_agreement_id'
+    billing_agreement_type = 'MerchantInitiatedTransaction'
+    subscription_amount = '1.23'
+
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&BillingAgreementAttributes.BillingAgreementType=#{billing_agreement_type}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation=#{custom_information}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId=#{seller_billing_agreement_id}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName=#{store_name}"\
+      "&BillingAgreementAttributes.SellerNote=seller_note"\
+      "&BillingAgreementAttributes.SubscriptionAmount.Amount=#{subscription_amount}"\
+      "&BillingAgreementAttributes.SubscriptionAmount.CurrencyCode=USD"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.set_billing_agreement_details(
+      AMAZON_BILLING_AGREEMENT_ID,
+      store_name: store_name,
+      seller_billing_agreement_id: seller_billing_agreement_id,
+      custom_information: custom_information,
+      seller_note: seller_note,
+      billing_agreement_type: billing_agreement_type,
+      subscription_amount: subscription_amount
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_set_billing_agreement_details_sca_without_amount
+    seller_note = 'seller_note'
+    store_name = 'store_name'
+    custom_information = 'custom_information'
+    seller_billing_agreement_id = 'seller_billing_agreement_id'
+    billing_agreement_type = 'CustomerInitiatedTransaction'
+
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=SetBillingAgreementDetails&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&BillingAgreementAttributes.BillingAgreementType=#{billing_agreement_type}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.CustomInformation=#{custom_information}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.SellerBillingAgreementId=#{seller_billing_agreement_id}"\
+      "&BillingAgreementAttributes.SellerBillingAgreementAttributes.StoreName=#{store_name}"\
+      "&BillingAgreementAttributes.SellerNote=seller_note"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.set_billing_agreement_details(
+      AMAZON_BILLING_AGREEMENT_ID,
+      store_name: store_name,
+      seller_billing_agreement_id: seller_billing_agreement_id,
+      custom_information: custom_information,
+      seller_note: seller_note,
+      billing_agreement_type: billing_agreement_type
+    )
+    assert_equal(true, res.success)
+  end
+
   def test_confirm_billing_agreement
     post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
       "&Action=ConfirmBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
@@ -856,6 +971,29 @@ class AmazonPayUnitTest < Minitest::Test
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.confirm_billing_agreement(AMAZON_BILLING_AGREEMENT_ID)
+    assert_equal(true, res.success)
+  end
+
+  def test_confirm_billing_agreement_sca
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
+      "&Action=ConfirmBillingAgreement&AmazonBillingAgreementId=#{AMAZON_BILLING_AGREEMENT_ID}"\
+      "&FailureUrl=#{FAILURE_URL_ENCODED}"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&SuccessUrl=#{SUCCESS_URL_ENCODED}"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.confirm_billing_agreement(
+      AMAZON_BILLING_AGREEMENT_ID,
+      success_url: SUCCESS_URL,
+      failure_url: FAILURE_URL
+    )
     assert_equal(true, res.success)
   end
 
@@ -897,10 +1035,10 @@ class AmazonPayUnitTest < Minitest::Test
        :headers => HEADERS).to_return(:status => 200)
 
     res = @client.authorize_on_billing_agreement(
-      AMAZON_BILLING_AGREEMENT_ID, 
-      AUTHORIZATION_REFERENCE_ID, 
-      AMOUNT, 
-      capture_now: "capture_now", 
+      AMAZON_BILLING_AGREEMENT_ID,
+      AUTHORIZATION_REFERENCE_ID,
+      AMOUNT,
+      capture_now: "capture_now",
       transaction_timeout: "transaction_timeout",
       supplementary_data: '{"AirlineMetaData" : {"version": 1.0}}'
     )
