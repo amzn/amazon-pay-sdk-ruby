@@ -669,6 +669,7 @@ module AmazonPay
     # @optional currency_code [String]
     # @optional merchant_id [String]
     # @optional mws_auth_token [String]
+    # @optional expect_immediate_authorization [Boolean]
     def confirm_order_reference(
       amazon_order_reference_id,
       success_url: nil,
@@ -676,7 +677,8 @@ module AmazonPay
       authorization_amount: nil,
       currency_code: @currency_code,
       merchant_id: @merchant_id,
-      mws_auth_token: nil
+      mws_auth_token: nil,
+      expect_immediate_authorization: nil
     )
 
       parameters = {
@@ -690,7 +692,8 @@ module AmazonPay
         'FailureUrl' => failure_url,
         'AuthorizationAmount.Amount' => authorization_amount,
         'AuthorizationAmount.CurrencyCode' => currency_code,
-        'MWSAuthToken' => mws_auth_token
+        'MWSAuthToken' => mws_auth_token,
+        'ExpectImmediateAuthorization' => expect_immediate_authorization
       }
 
       optional['AuthorizationAmount.CurrencyCode'] = nil if authorization_amount.nil?

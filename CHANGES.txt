@@ -1,3 +1,6 @@
+Version - 2.6.0 - February 2021
+- Added additional attribute (expect_immediate_authorization) to ConfirmOrderReference. This value can be set to true or false (Boolean). See Amazon Pay Strong Customer Authentication (SCA) Upgrade Integration Guide for more information.
+
 Version 2.5.0 - August 2019
 - (EU/UK) confirm_billing_agreement API has two new optional request parameters:
   success_url, failure_url

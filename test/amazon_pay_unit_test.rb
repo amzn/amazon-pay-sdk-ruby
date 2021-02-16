@@ -485,6 +485,46 @@ class AmazonPayUnitTest < Minitest::Test
     assert_equal(true, res.success)
   end
 
+  def test_confirm_order_reference_with_expect_immediate_authorization_as_true
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&ExpectImmediateAuthorization=true"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.confirm_order_reference(
+      AMAZON_ORDER_REFERENCE_ID,
+      expect_immediate_authorization: true
+    )
+    assert_equal(true, res.success)
+  end
+
+  def test_confirm_order_reference_with_expect_immediate_authorization_as_false
+    post_url = "AWSAccessKeyId=#{ACCESS_KEY}&Action=ConfirmOrderReference&AmazonOrderReferenceId=#{AMAZON_ORDER_REFERENCE_ID}"\
+      "&ExpectImmediateAuthorization=false"\
+      "&SellerId=#{MERCHANT_ID}"\
+      "&SignatureMethod=HmacSHA256"\
+      "&SignatureVersion=2"\
+      "&Timestamp=#{@operation.send :custom_escape, Time.now.utc.iso8601}&Version=2013-01-01"
+    post_body = ["POST", "mws.amazonservices.com", "/OffAmazonPayments_Sandbox/2013-01-01", post_url].join("\n")
+
+    stub_request(:post, "https://mws.amazonservices.com/OffAmazonPayments_Sandbox/2013-01-01").with(:body => "#{post_url}"\
+      "&Signature=#{@operation.send :sign, post_body}",
+       :headers => HEADERS).to_return(:status => 200)
+
+    res = @client.confirm_order_reference(
+      AMAZON_ORDER_REFERENCE_ID,
+      expect_immediate_authorization: false
+    )
+    assert_equal(true, res.success)
+  end
+
   def test_list_order_reference
     post_url = "AWSAccessKeyId=#{ACCESS_KEY}"\
       "&Action=ListOrderReference"\
