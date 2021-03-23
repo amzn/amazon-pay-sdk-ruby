@@ -1,3 +1,6 @@
+Version - 2.6.1 - March 2021
+- Fixed security risk - Buyer Access token is passed as HTTP header instead of query parameter in URL for get_login_profile API
+
 Version - 2.6.0 - February 2021
 - Added additional attribute (expect_immediate_authorization) to ConfirmOrderReference. This value can be set to true or false (Boolean). See Amazon Pay Strong Customer Authentication (SCA) Upgrade Integration Guide for more information.
 

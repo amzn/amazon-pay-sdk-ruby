@@ -33,9 +33,9 @@ module AmazonPay
     # @param access_token [String]
     def get_login_profile(access_token)
       decoded_access_token = URI.decode(access_token)
-      encoded_access_token = URI.encode(decoded_access_token)
-      uri = URI("https://#{@sandbox_str}.#{@endpoint}/auth/o2/tokeninfo?access_token=#{encoded_access_token}")
+      uri = URI("https://#{@sandbox_str}.#{@endpoint}/auth/o2/tokeninfo")
       req = Net::HTTP::Get.new(uri.request_uri)
+      req['x-amz-access-token'] = decoded_access_token
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -46,7 +46,7 @@ module AmazonPay
 
       uri = URI.parse("https://#{@sandbox_str}.#{@endpoint}/user/profile")
       req = Net::HTTP::Get.new(uri.request_uri)
-      req['Authorization'] = 'bearer ' + decoded_access_token
+      req['x-amz-access-token'] = decoded_access_token
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
