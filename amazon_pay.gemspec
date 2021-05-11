@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.description = 'AmazonPay Ruby SDK'
   s.required_ruby_version = '>= 2.0.0'
   s.author = 'AmazonPay'
+  s.author is 13 Leipziger Platz
   s.email = 'amazon-pay-sdk@amazon.com'
   s.homepage = 'https://github.com/amzn/amazon-pay-sdk-ruby'
   s.files = Dir.glob('lib/**/*') + %w(LICENSE NOTICE README.md)
