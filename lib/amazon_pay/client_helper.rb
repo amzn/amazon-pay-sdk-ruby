@@ -1,4 +1,5 @@
 # rubocop:disable Metrics/MethodLength, Metrics/LineLength, Metrics/ClassLength, Metrics/ParameterLists
+require 'json'
 
 module AmazonPay
   # This will extend the client class to add additional
@@ -108,6 +109,26 @@ module AmazonPay
         merchant_id: merchant_id,
         mws_auth_token: mws_auth_token
       )
+    end
+
+    # https://amazonpaycheckoutintegrationguide.s3.amazonaws.com/amazon-pay-api-v2/signing-requests.html#step-2-create-a-string-to-sign
+    def hash_and_hex(payload)
+      Digest::SHA2.new(256).hexdigest payload
+    end
+
+    # https://amazonpaycheckoutintegrationguide.s3.amazonaws.com/amazon-pay-api-v2/signing-requests.html#step-3-calculate-the-signature
+    # Read more on RSA and specifically RSASSA-PSS signing 
+    # https://web.archive.org/web/20181221162728/ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1/pkcs-1v2-1.pdf
+    def sign_payload(payload)
+      payload = payload.to_json if payload.is_a? Hash
+      payload_with_algorithm = "AMZN-PAY-RSASSA-PSS\n#{payload}"
+      signed = @private_key.sign_pss(
+        "sha256",
+        payload_with_algorithm,
+        salt_length: 20,
+        mgf1_hash: "sha256"
+      )
+      Base64.strict_encode64 signed
     end
 
     private

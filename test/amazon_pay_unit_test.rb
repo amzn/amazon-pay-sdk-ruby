@@ -8,6 +8,7 @@ class AmazonPayUnitTest < Minitest::Test
   MERCHANT_ID = 'MERCHANT_ID'
   ACCESS_KEY = 'ACCESS_KEY'
   SECRET_KEY = 'SECRET_KEY'
+  PRIVATE_KEY = OpenSSL::PKey::RSA.generate(2048)
   SANDBOX = true
   AMAZON_ORDER_REFERENCE_ID = 'AMAZON_ORDER_REFERENCE_ID'
   AMAZON_BILLING_AGREEMENT_ID = 'AMAZON_BILLING_AGREEMENT_ID'
@@ -64,7 +65,7 @@ class AmazonPayUnitTest < Minitest::Test
   }.to_json
 
   def setup
-    @client = AmazonPay::Client.new(MERCHANT_ID, ACCESS_KEY, SECRET_KEY, sandbox: SANDBOX)
+    @client = AmazonPay::Client.new(MERCHANT_ID, ACCESS_KEY, SECRET_KEY, sandbox: SANDBOX, private_key: PRIVATE_KEY)
     @operation = AmazonPay::Request.new(
       {'Action' => 'Test'},
       {},
@@ -84,6 +85,17 @@ class AmazonPayUnitTest < Minitest::Test
       nil
     )
     @ipn = AmazonPay::IpnHandler.new(IPN_HEADERS, IPN_BODY)
+  end
+
+  def test_sign_payload
+    payload_json = '{"key1":"value1"}'
+    signed_payload = @client.sign_payload payload_json
+    assert verify_signature(signed_payload, payload_json)
+
+    # test hash payload for "same" signature
+    payload_object = { key1: 'value1' }
+    signed_payload = @client.sign_payload payload_object
+    assert verify_signature(signed_payload, payload_json)
   end
 
   def test_send_request
@@ -1294,6 +1306,18 @@ class AmazonPayUnitTest < Minitest::Test
   def test_canonical_string
     res = @ipn.send :canonical_string
     assert_equal("Message\n{\"NotificationType\":\"NotificationType\",\"SellerId\":\"SellerId\",\"ReleaseEnvironment\":\"ReleaseEnvironment\",\"Version\":\"Version\",\"NotificationData\":\"NotificationData\",\"Timestamp\":\"Timestamp\"}\nMessageId\nMessageId\nTimestamp\nTimestamp\nTopicArn\nTopicArn\nType\nType\n", res)
+  end
+
+  private
+
+  def verify_signature(signed_payload, payload)
+    @client.private_key.public_key.verify_pss(
+      "sha256",
+      Base64.strict_decode64(signed_payload),
+      "AMZN-PAY-RSASSA-PSS\n#{payload}",
+      salt_length: 20,
+      mgf1_hash: "sha256"
+    )
   end
 
 end

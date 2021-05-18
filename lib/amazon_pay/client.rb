@@ -15,6 +15,8 @@ module AmazonPay
       :merchant_id,
       :access_key,
       :secret_key,
+      :private_key,
+      :public_key_id,
       :sandbox,
       :currency_code,
       :region,
@@ -57,6 +59,8 @@ module AmazonPay
       merchant_id,
       access_key,
       secret_key,
+      private_key: nil,
+      public_key_id: nil,
       sandbox: false,
       currency_code: :usd,
       region: :na,
@@ -75,6 +79,8 @@ module AmazonPay
       @merchant_id = merchant_id
       @access_key = access_key
       @secret_key = secret_key
+      @private_key = private_key
+      @public_key_id = public_key_id
       @currency_code = currency_code.to_s.upcase
       @sandbox = sandbox
       @sandbox_str = @sandbox ? 'OffAmazonPayments_Sandbox' : 'OffAmazonPayments'
@@ -1134,6 +1140,11 @@ module AmazonPay
       end
 
       list
+    end
+
+    def generate_button_signature(payload)
+      hex = hash_and_hex payload.to_json
+      sign_payload hex, @private_key
     end
 
     def operation(parameters, optional)
