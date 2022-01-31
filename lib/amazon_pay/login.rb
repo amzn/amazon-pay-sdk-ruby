@@ -32,7 +32,7 @@ module AmazonPay
     # return the user's profile information.
     # @param access_token [String]
     def get_login_profile(access_token)
-      decoded_access_token = URI.decode(access_token)
+      decoded_access_token = URI::DEFAULT_PARSER.unescape(access_token)
       uri = URI("https://#{@sandbox_str}.#{@endpoint}/auth/o2/tokeninfo")
       req = Net::HTTP::Get.new(uri.request_uri)
       req['x-amz-access-token'] = decoded_access_token
