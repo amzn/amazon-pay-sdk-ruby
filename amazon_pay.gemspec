@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
   s.files = Dir.glob('lib/**/*') + %w(LICENSE NOTICE README.md)
   s.require_path = ['lib']
   s.license = 'Apache License, Version 2.0'
+
+  s.add_runtime_dependency 'rexml'
 end
